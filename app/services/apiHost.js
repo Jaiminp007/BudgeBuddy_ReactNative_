@@ -760,7 +760,6 @@
 
 // export { fetchDataHostProblems };
 
-
 import axios from "axios";
 
 const SERVER_URL = "https://nms.sanghviinfo.com";
@@ -831,19 +830,13 @@ const login = async () => {
   }
 };
 
-const fetchProblems = async (authToken, limit, offset) => {
+const fetchProblems = async (authToken, HostID) => {
   const payload = {
     jsonrpc: "2.0",
     method: "problem.get",
     params: {
-      output: "extend",
-      selectAcknowledges: "extend",
-      selectTags: "extend",
-      recent: true,
-      sortfield: ["eventid"],
-      sortorder: "DESC",
-      limit,
-      offset,
+      output: ["clock", "eventid", "acknowledged", "name", "severity"],
+      hostids: HostID,
     },
     auth: authToken,
     id: 1,
@@ -866,14 +859,13 @@ const fetchProblems = async (authToken, limit, offset) => {
   }
 };
 
-const fetchHostDetails = async (authToken, hostId) => {
+const fetchHostDetails = async (authToken) => {
   const payload = {
     jsonrpc: "2.0",
     method: "host.get",
     params: {
-      output: ["hostid", "name"],
-      hostids: hostId,
-      selectInterfaces: ["interfaceid", "ip"],
+      output: ["hostid", "host"],
+      //limit: 10,
     },
     auth: authToken,
     id: 1,
@@ -882,7 +874,8 @@ const fetchHostDetails = async (authToken, hostId) => {
   try {
     const response = await axiosInstance.post("", payload);
     if (response.data.result) {
-      return response.data.result[0];
+      // console.log(response.data);
+      return response.data.result;
     } else if (response.data.error) {
       console.error("Error fetching host details:", response.data.error);
       throw new Error(`Error fetching host details: ${response.data.error}`);
@@ -896,55 +889,97 @@ const fetchHostDetails = async (authToken, hostId) => {
   }
 };
 
-const fetchDataHostProblems = async (limit, offset) => {
+const fetchDataHostProblems = async () => {
   try {
     console.log("Fetching data...");
     const authToken = await login();
-    const problems = await fetchProblems(authToken, limit, offset);
+    //const problems = await fetchProblems(authToken, limit, offset);
 
-    const hostIds = [...new Set(problems.map((problem) => problem.objectid))];
+    // const hostIds = [...new Set(problems.map((problem) => problem.objectid))];
 
-    const hostData = await Promise.all(
-      hostIds.map(async (hostId) => {
-        const hostDetails = await fetchHostDetails(authToken, hostId);
-        const ip =
-          hostDetails.interfaces &&
-          hostDetails.interfaces[0] &&
-          hostDetails.interfaces[0].ip
-            ? hostDetails.interfaces[0].ip
-            : "N/A";
+    const hostDetails = await fetchHostDetails(authToken);
 
-        const hostProblems = problems.filter(
-          (problem) => problem.objectid === hostId
-        );
+    // console.log(hostDetails);
 
-        const totalProblems = hostProblems.length;
-        const severityCounts = hostProblems.reduce((acc, problem) => {
-          const severity = problem.severity;
-          acc[severity] = (acc[severity] || 0) + 1;
-          return acc;
-        }, {});
-        const problemNames = hostProblems.map((problem) => problem.name);
+    //  const test = [];
+    // let problemDetail;
 
-        return {
-          hostName: hostDetails.name,
-          ip,
-          totalProblems,
-          problemNames,
-          severityCounts,
-        };
-      })
-    );
+    // const hostids = hostDetails.map((item) => item.hostid, item.host);
+    // console.log(hostDetails);
 
-    // Sort hosts by the number of problems in descending order
-    hostData.sort((a, b) => b.totalProblems - a.totalProblems);
+    // for (host in hostids) {
+    //   console.log(host);
 
-    console.log("Host Data with Problems:", hostData);
-    return hostData;
+    //   // problemDetail = await fetchProblems(authToken, host["hostid"]);
+    //   //  console.log(problemDetail);
+    //   //   console.log(problemDetail);
+    //   //test.append(problemDetail);
+    // }
+
+    //const problemDetail = await fetchProblems(authToken, "10084");
+
+    //console.log(test);
+
+    // return hostDetails;
+
+    // Extract hostid and host from hostDetails
+    const hostInfo = Object.values(hostDetails).map((detail) => ({
+      hostid: detail.hostid,
+      host: detail.host,
+    }));
+    //  console.log(hostInfo);
+
+    // Iterate over hostInfo and fetch problems for each hostid
+    // Iterate over hostInfo and fetch problems for each hostid
+    const test = [];
+    for (const { hostid, host } of hostInfo) {
+      console.log("Fetching problems for hostid:", hostid, "host:", host);
+      const problems = await fetchProblems(authToken, hostid);
+
+      // Add hostid and host to each problem detail
+      const problemDetails = problems.map((problem) => ({
+        ...problem,
+        hostid,
+        host,
+      }));
+
+      //console.log(problemDetails);
+      test.push(...problemDetails); // Add all problem details to the test array
+      console.log(problemDetails);
+    }
+
+    return hostDetails;
+
+    // const ip =
+    //   hostDetails.interfaces &&
+    //   hostDetails.interfaces[0] &&
+    //   hostDetails.interfaces[0].ip
+    //     ? hostDetails.interfaces[0].ip
+    //     : "N/A";
+
+    // const hostProblems = problems.filter(
+    //   (problem) => problem.objectid === hostId
+    // );
+
+    // const totalProblems = hostProblems.length;
+    // const severityCounts = hostProblems.reduce((acc, problem) => {
+    //   const severity = problem.severity;
+    //   acc[severity] = (acc[severity] || 0) + 1;
+    //   return acc;
+    // }, {});
+    // const problemNames = hostProblems.map((problem) => problem.name);
+
+    // return {
+    //   hostName: hostDetails.name,
+    //   ip,
+    //   totalProblems,
+    //   problemNames,
+    //   severityCounts,
+    // };
   } catch (error) {
     console.error("Error fetching data:", error);
     throw error;
   }
 };
 
-export { fetchDataHostProblems };
+export { fetchDataHostProblems, fetchHostDetails };
