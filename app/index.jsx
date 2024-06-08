@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { StyleSheet, View, Text } from "react-native";
+// import App from './App'
 import { Link } from "expo-router";
 import LoginScreen from "./components/LoginScreen";
+
 
 export default function App() {
   return <LoginScreen />;

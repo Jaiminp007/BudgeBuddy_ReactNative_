@@ -10,6 +10,9 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { CheckBox } from "react-native-elements";
+import { useNavigation } from "@react-navigation/native";
+
+// const navigation = useNavigation();
 
 const LoginScreen = () => {
   const [serverName, setServerName] = useState("");
@@ -42,7 +45,7 @@ const LoginScreen = () => {
     });
   };
 
-  const toggleHttpAuth = () => {
+  function toggleHttpAuth() {
     setUseHttpAuth(!useHttpAuth);
     Animated.timing(httpFieldsHeight, {
       toValue: useHttpAuth ? 0 : 100, // Adjust based on the actual height needed
@@ -50,7 +53,7 @@ const LoginScreen = () => {
       easing: Easing.ease,
       useNativeDriver: false,
     }).start();
-  };
+  }
 
   return (
     <View style={styles.container}>
