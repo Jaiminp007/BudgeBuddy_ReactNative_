@@ -11,7 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import { CheckBox } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
-
+// import { login } from "../services/apiHost";
 // const navigation = useNavigation();
 
 const LoginScreen = () => {
@@ -24,10 +24,11 @@ const LoginScreen = () => {
   const [httpUser, setHttpUser] = useState("");
   const [httpPassword, setHttpPassword] = useState("");
   const [httpFieldsHeight] = useState(new Animated.Value(0));
-
+  // const authToken = login();
   const router = useRouter();
 
   const handleLogin = () => {
+    // const authToken = login();
     // Implement your login logic here
     // Navigate to the Dashboard screen
     router.push({
@@ -39,12 +40,14 @@ const LoginScreen = () => {
         password,
         httpUser,
         httpPassword,
+        // authToken,
         rememberMe: rememberMe.toString(),
         useHttpAuth: useHttpAuth.toString(),
       },
     });
   };
 
+  
   function toggleHttpAuth() {
     setUseHttpAuth(!useHttpAuth);
     Animated.timing(httpFieldsHeight, {

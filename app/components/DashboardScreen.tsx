@@ -6,15 +6,17 @@ import {
   Dimensions,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import { fetchHostGroupProblems } from "../services/apiHost";
+import { fetchHostGroupProblems, authService } from "../services/apiHost";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from '@react-navigation/native';
 import { useRouter, useLocalSearchParams } from "expo-router";
 
 const DashboardScreen = ({ navigation }) => {
+  const [loading, setLoading] = useState(true);
+  const [authToken, setAuthToken] = useState<string | null>(null);
   const { serverName, serverHost, username, password, httpUser, httpPassword, rememberMe, useHttpAuth } = useLocalSearchParams();
-  console.log(serverName, serverHost, username, password, httpUser, httpPassword, rememberMe, useHttpAuth )
   const router = useRouter();
   const [tableData, setTableData] = useState([]);
   const [severityCount, setSeverityCount] = useState({
@@ -25,6 +27,16 @@ const DashboardScreen = ({ navigation }) => {
     Info: 0,
     "N/A": 0,
   });
+
+  const navigateToGroupProblems = (gid, gname) => {
+    router.push({
+      pathname: "/groupProblems",
+      params: {
+        groupId: gid,
+        groupName: gname,
+      },
+    });
+  };
 
   const mapSeverity = (severity) => {
     switch (severity) {
@@ -43,9 +55,10 @@ const DashboardScreen = ({ navigation }) => {
     }
   };
 
-  const fetchData = async () => {
-    const { allProblems, groupProblemCounts } = await fetchHostGroupProblems(username, password);
-    const transformedData = Object.entries(groupProblemCounts).map(([groupName, { problemCount, totalHosts }]) => ({
+  const fetchData = async (token) => {
+    const { allProblems, groupProblemCounts } = await fetchHostGroupProblems(token);
+    const transformedData = Object.entries(groupProblemCounts).map(([groupID, { groupName, problemCount, totalHosts }]) => ({
+      gid: groupID,
       gname: groupName,
       pcount: problemCount,
       totalHosts: totalHosts,
@@ -69,15 +82,25 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    
-    fetchData();
-    const intervalId = setInterval(() => {
-      fetchData();
-    }, 30000); // Fetch data every 30 seconds
-    return () => clearInterval(intervalId);
-  }, []);
+    const initialize = async () => {
+      const token = await authService.login();
+      setAuthToken(token);
+      await fetchData(token);
+      setLoading(false);
+    };
 
-  const tableHead = ["Host Name", "Problems", "Total Hosts"];
+    initialize();
+
+    const intervalId = setInterval(() => {
+      if (authToken) {
+        fetchData(authToken);
+      }
+    }, 30000); // Fetch data every 30 seconds
+
+    return () => clearInterval(intervalId);
+  }, [authToken]);
+
+  const tableHead = ["Host Group", "Problems", "Total Hosts"];
 
   const severityColors = {
     Disaster: "#E57373",
@@ -98,7 +121,7 @@ const DashboardScreen = ({ navigation }) => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Host Name</Text>
-        <TouchableOpacity onPress={fetchData} style={styles.refreshButton}>
+        <TouchableOpacity onPress={() => fetchData(authToken)} style={styles.refreshButton}>
           <Ionicons name="refresh" size={24} color="black" />
         </TouchableOpacity>
         <TouchableOpacity onPress={ProblemSc} style={styles.menuButton}>
@@ -106,32 +129,40 @@ const DashboardScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
       <View style={styles.content}>
-        <View style={styles.hugeRectangle}>
-          {Object.entries(severityCount).map(([severity, count]) => (
-            <View key={severity} style={[styles.box, { backgroundColor: severityColors[severity] }]}>
-              <Text style={styles.boxNumber}>{count}</Text>
-              <Text style={styles.boxText}>{severity}</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#007BFF" />
+        ) : (
+          <>
+            <View style={styles.hugeRectangle}>
+              {Object.entries(severityCount).map(([severity, count]) => (
+                <View key={severity} style={[styles.box, { backgroundColor: severityColors[severity] }]}>
+                  <Text style={styles.boxNumber}>{count}</Text>
+                  <Text style={styles.boxText}>{severity}</Text>
+                </View>
+              ))}
             </View>
-          ))}
-        </View>
-        <View style={styles.tableContainer}>
-          <View style={styles.tableRow}>
-            {tableHead.map((header, index) => (
-              <Text key={index} style={styles.tableHeader}>
-                {header}
-              </Text>
-            ))}
-          </View>
-          {tableData
-            .filter((rowData) => rowData.totalHosts > 0) // Filter out rows where totalHosts is 0
-            .map((rowData, rowIndex) => (
-              <View key={rowIndex} style={styles.tableRow}>
-                <Text style={styles.tableCell}>{rowData.gname}</Text>
-                <Text style={styles.tableCell}>{rowData.pcount}</Text>
-                <Text style={styles.tableCell}>{rowData.totalHosts}</Text>
+            <View style={styles.tableContainer}>
+              <View style={styles.tableRow}>
+                {tableHead.map((header, index) => (
+                  <Text key={index} style={styles.tableHeader}>
+                    {header}
+                  </Text>
+                ))}
               </View>
-            ))}
-        </View>
+              {tableData
+                .filter((rowData) => rowData.totalHosts > 0) // Filter out rows where totalHosts is 0
+                .map((rowData, rowIndex) => (
+                  <TouchableOpacity key={rowIndex} onPress={() => navigateToGroupProblems(rowData.gid, rowData.gname)}>
+                    <View key={rowIndex} style={styles.tableRow}>
+                      <Text style={styles.tableCell}>{rowData.gname}</Text>
+                      <Text style={styles.tableCell}>{rowData.pcount}</Text>
+                      <Text style={styles.tableCell}>{rowData.totalHosts}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+            </View>
+          </>
+        )}
       </View>
     </ScrollView>
   );
@@ -208,13 +239,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     padding: 5,
-    fontSize: 12,
+    fontSize: 15,
   },
   tableCell: {
     flex: 1,
     textAlign: "center",
     padding: 5,
-    fontSize: 12,
+    fontSize: 15,
   },
 });
 

@@ -6,12 +6,18 @@ import {
   Dimensions,
   ScrollView,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
-import { fetchDataHostProblems } from "../services/apiHost";
+import { fetchDataHostProblems, authService } from "../services/apiHost";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 const ProblemScreen = () => {
+  const router = useRouter();
+  const [authToken, setAuthToken] = useState<string | null>(null);
   const [tableData, setTableData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [severityCount, setSeverityCount] = useState({
     Disaster: 0,
     High: 0,
@@ -21,16 +27,30 @@ const ProblemScreen = () => {
     "N/A": 0,
   });
 
-  const fetchData = async () => {
-    const data = await fetchDataHostProblems();
+  const navigateToHostDetails = (hostName, problemName, severity, duration, hostID) => {
+    router.push({
+      pathname: "/hostDetailScreen",
+      params: {
+        hostName,
+        problemName,
+        severity,
+        duration,
+        hostID,
+      },
+    });
+  };
+
+  const fetchData = async (token) => {
+    const data = await fetchDataHostProblems(token);
     const transformedData = data.map((event) => [
       event.hosts[0]?.host || "Unknown Host",
       event.name,
       mapSeverity(event.severity),
       event.duration,
+      event.hosts[0]?.hostid,
     ]);
-    // transformedData.sort((a, b) => a[3] - b[3]);
     setTableData(transformedData);
+    setFilteredData(transformedData);
 
     const counts = {
       Disaster: 0,
@@ -66,18 +86,28 @@ const ProblemScreen = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    const initialize = async () => {
+      const token = await authService.login();
+      setAuthToken(token);
+      await fetchData(token);
+    };
 
-  // useEffect(() => {
-  //   fetchData(); // Initial data fetch
+    initialize();
 
-  //   const intervalId = setInterval(() => {
-  //     fetchData(); // Fetch data every 5 seconds
-  //   }, 5000);
+    const intervalId = setInterval(() => {
+      if (authToken) {
+        fetchData(authToken);
+      }
+    }, 30000); // Fetch data every 30 seconds
 
-  //   return () => clearInterval(intervalId); // Clear interval on component unmount
-  // }, []);
+    return () => clearInterval(intervalId);
+  }, [authToken]);
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    const filteredData = tableData.filter(row => row[0].toLowerCase().includes(text.toLowerCase()));
+    setFilteredData(filteredData);
+  };
 
   const tableHead = ["Host Name", "Problems", "Time"];
 
@@ -90,15 +120,22 @@ const ProblemScreen = () => {
     "N/A": "#D3D3D3", // Light Grey (unchanged)
   };
 
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Server Name</Text>
         <Text style={styles.headerText}>Server URL</Text>
-        <TouchableOpacity onPress={fetchData} style={styles.refreshButton}>
+        <TouchableOpacity onPress={() => fetchData(authToken)} style={styles.refreshButton}>
           <Ionicons name="refresh" size={24} color="black" />
         </TouchableOpacity>
+      </View>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search Host Name..."
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
       </View>
       <View style={styles.content}>
         <View style={styles.hugeRectangle}>
@@ -140,24 +177,26 @@ const ProblemScreen = () => {
               </Text>
             ))}
           </View>
-          {tableData.map((rowData, rowIndex) => (
-            <View key={rowIndex} style={styles.tableRow}>
-              {rowData
-                .filter((_, index) => index !== 2) // Filtering out the "Severity" column
-                .map((cellData, cellIndex) => (
-                  <Text
-                    key={cellIndex}
-                    style={[
-                      styles.tableCell,
-                      cellIndex === 0 && styles.tableCellHost,
-                      cellIndex === 1 && {
-                        backgroundColor: severityColors[rowData[2]],
-                      }, // Color the "With problems" column
-                    ]}>
-                    {cellData}
-                  </Text>
-                ))}
-            </View>
+          {filteredData.map((rowData, rowIndex) => (
+            <TouchableOpacity key={rowIndex} onPress={() => navigateToHostDetails(rowData[0], rowData[1], rowData[2], rowData[3], rowData[4])}>
+              <View key={rowIndex} style={styles.tableRow}>
+                {rowData
+                  .filter((_, index) => index !== 2 && index !== 4) // Filtering out the "Severity" column and hostID
+                  .map((cellData, cellIndex) => (
+                    <Text
+                      key={cellIndex}
+                      style={[
+                        styles.tableCell,
+                        cellIndex === 0 && styles.tableCellHost,
+                        cellIndex === 1 && {
+                          backgroundColor: severityColors[rowData[2]],
+                        }, // Color the "With problems" column
+                      ]}>
+                      {cellData}
+                    </Text>
+                  ))}
+              </View>
+            </TouchableOpacity>
           ))}
         </View>
       </View>
@@ -189,6 +228,16 @@ const styles = StyleSheet.create({
   },
   refreshButton: {
     marginLeft: "auto",
+  },
+  searchContainer: {
+    padding: 10,
+  },
+  searchInput: {
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
   },
   content: {
     flex: 1,
@@ -239,7 +288,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     padding: 5,
-    fontSize: 12,
+    fontSize: 15,
   },
   tableHeaderHost: {
     flex: 2, // Host group column size
@@ -249,7 +298,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
     padding: 5,
-    fontSize: 12,
+    fontSize: 15,
     width:5,
   },
   tableCellHost: {
