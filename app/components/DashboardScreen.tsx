@@ -1,3 +1,5 @@
+// DashboardScreen.tsx
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -10,13 +12,22 @@ import {
 } from "react-native";
 import { fetchHostGroupProblems, authService } from "../services/apiHost";
 import { Ionicons } from "@expo/vector-icons";
-import { DrawerActions } from '@react-navigation/native';
+import { DrawerActions } from "@react-navigation/native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
 const DashboardScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [authToken, setAuthToken] = useState<string | null>(null);
-  const { serverName, serverHost, username, password, httpUser, httpPassword, rememberMe, useHttpAuth } = useLocalSearchParams();
+  const {
+    serverName,
+    serverHost,
+    username,
+    password,
+    httpUser,
+    httpPassword,
+    rememberMe,
+    useHttpAuth,
+  } = useLocalSearchParams();
   const router = useRouter();
   const [tableData, setTableData] = useState([]);
   const [severityCount, setSeverityCount] = useState({
@@ -56,13 +67,17 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   const fetchData = async (token) => {
-    const { allProblems, groupProblemCounts } = await fetchHostGroupProblems(token);
-    const transformedData = Object.entries(groupProblemCounts).map(([groupID, { groupName, problemCount, totalHosts }]) => ({
-      gid: groupID,
-      gname: groupName,
-      pcount: problemCount,
-      totalHosts: totalHosts,
-    }));
+    const { allProblems, groupProblemCounts } = await fetchHostGroupProblems(
+      token
+    );
+    const transformedData = Object.entries(groupProblemCounts).map(
+      ([groupID, { groupName, problemCount, totalHosts }]) => ({
+        gid: groupID,
+        gname: groupName,
+        pcount: problemCount,
+        totalHosts: totalHosts,
+      })
+    );
     setTableData(transformedData);
 
     const counts = {
@@ -74,7 +89,7 @@ const DashboardScreen = ({ navigation }) => {
       "N/A": 0,
     };
 
-    Object.values(allProblems).forEach(problem => {
+    Object.values(allProblems).forEach((problem) => {
       counts[mapSeverity(problem.severity)]++;
     });
 
@@ -120,12 +135,15 @@ const DashboardScreen = ({ navigation }) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Host Name</Text>
-        <TouchableOpacity onPress={() => fetchData(authToken)} style={styles.refreshButton}>
-          <Ionicons name="refresh" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={ProblemSc} style={styles.menuButton}>
+        <TouchableOpacity
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
           <Ionicons name="menu" size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Host Name</Text>
+        <TouchableOpacity
+          onPress={() => fetchData(authToken)}
+          style={styles.refreshButton}>
+          <Ionicons name="refresh" size={24} color="black" />
         </TouchableOpacity>
       </View>
       <View style={styles.content}>
@@ -135,7 +153,12 @@ const DashboardScreen = ({ navigation }) => {
           <>
             <View style={styles.hugeRectangle}>
               {Object.entries(severityCount).map(([severity, count]) => (
-                <View key={severity} style={[styles.box, { backgroundColor: severityColors[severity] }]}>
+                <View
+                  key={severity}
+                  style={[
+                    styles.box,
+                    { backgroundColor: severityColors[severity] },
+                  ]}>
                   <Text style={styles.boxNumber}>{count}</Text>
                   <Text style={styles.boxText}>{severity}</Text>
                 </View>
@@ -152,7 +175,11 @@ const DashboardScreen = ({ navigation }) => {
               {tableData
                 .filter((rowData) => rowData.totalHosts > 0) // Filter out rows where totalHosts is 0
                 .map((rowData, rowIndex) => (
-                  <TouchableOpacity key={rowIndex} onPress={() => navigateToGroupProblems(rowData.gid, rowData.gname)}>
+                  <TouchableOpacity
+                    key={rowIndex}
+                    onPress={() =>
+                      navigateToGroupProblems(rowData.gid, rowData.gname)
+                    }>
                     <View key={rowIndex} style={styles.tableRow}>
                       <Text style={styles.tableCell}>{rowData.gname}</Text>
                       <Text style={styles.tableCell}>{rowData.pcount}</Text>
@@ -246,7 +273,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     padding: 5,
     fontSize: 15,
-    width:5,
   },
 });
 
