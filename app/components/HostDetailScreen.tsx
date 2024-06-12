@@ -18,7 +18,7 @@ const HostDetailScreen = () => {
   const [pingResponse, setPingResponse] = useState<{ response: string, value: string } | null>(null);
   const [tracerouteResponse, setTracerouteResponse] = useState<{ response: string, value: string } | null>(null);
   const [loadingPing, setLoadingPing] = useState(false);
-  const [loadingTraceroute, setLoadingTracerout] = useState(false);
+  const [loadingTraceroute, setLoadingTraceroute] = useState(false);
   const { hostName, hostID, problemName, severity, duration } = useLocalSearchParams();
   const navigation = useNavigation();
   console.log("Row Data", hostName, problemName, severity, duration);
@@ -40,7 +40,7 @@ const HostDetailScreen = () => {
   };
 
   const handleTraceroute = async () => {
-    setLoadingTracerout(true);
+    setLoadingTraceroute(true);
     try {
       const token = await authService.login();
       setAuthToken(token);
@@ -51,7 +51,7 @@ const HostDetailScreen = () => {
         Alert.alert("Traceroute Response", `${response.value}`);
       }
     } finally {
-      setLoadingTracerout(false);
+      setLoadingTraceroute(false);
     }
   };
 

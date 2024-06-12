@@ -1,13 +1,13 @@
 import axios from "axios";
 
-// const SERVER_URL = "http://43.252.198.181";
-// const USERNAME = "Admin";
-// const PASSWORD = "Gfgnl@#123";
+const SERVER_URL = "http://43.252.198.181";
+const USERNAME = "Admin";
+const PASSWORD = "Gfgnl@#123";
 
 
-const SERVER_URL = "https://nms.sanghviinfo.com";
-const USERNAME = "snv_monitor";
-const PASSWORD = "v4kUtbTYpeu6#9!a";
+// const SERVER_URL = "https://nms.sanghviinfo.com";
+// const USERNAME = "snv_monitor";
+// const PASSWORD = "v4kUtbTYpeu6#9!a";
 
 // Axios instance with interceptors for logging and retry mechanism
 const axiosInstance = axios.create({
@@ -182,6 +182,7 @@ const fetchEvents = async (authToken, eventIds) => {
     method: "event.get",
     params: {
       output: "extend",
+      selectAcknowledges: "extend",
       eventids: eventIds,
       sortfield: ["clock"],
       selectHosts: ["hostid", "host"],
