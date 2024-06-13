@@ -1,13 +1,12 @@
 import axios from "axios";
 
-const SERVER_URL = "http://43.252.198.181";
-const USERNAME = "Admin";
-const PASSWORD = "Gfgnl@#123";
+// const SERVER_URL = "http://43.252.198.181";
+// const USERNAME = "Admin";
+// const PASSWORD = "Gfgnl@#123";
 
-
-// const SERVER_URL = "https://nms.sanghviinfo.com";
-// const USERNAME = "snv_monitor";
-// const PASSWORD = "v4kUtbTYpeu6#9!a";
+const SERVER_URL = "https://nms.sanghviinfo.com";
+const USERNAME = "snv_monitor";
+const PASSWORD = "v4kUtbTYpeu6#9!a";
 
 // Axios instance with interceptors for logging and retry mechanism
 const axiosInstance = axios.create({
@@ -55,14 +54,50 @@ class AuthService {
     return AuthService.instance;
   }
 
-  async login() {
+  async login(url, username, password, httpAuth = null) {
+    const axiosInstance = axios.create({
+      baseURL: `${url}/zabbix/api_jsonrpc.php`,
+      headers: { "Content-Type": "application/json-rpc" },
+      timeout: 3600000,
+    });
+
+    axiosInstance.interceptors.request.use(
+      (config) => {
+        console.log("Starting Request", JSON.stringify(config, null, 2));
+        return config;
+      },
+      (error) => {
+        console.error("Request Error", error);
+        return Promise.reject(error);
+      }
+    );
+
+    axiosInstance.interceptors.response.use(
+      (response) => {
+        console.log("Response:", JSON.stringify(response, null, 2));
+        return response;
+      },
+      async (error) => {
+        console.error("Response Error", error);
+        if (
+          error.code === "ERR_NETWORK" &&
+          error.config &&
+          !error.config.__isRetryRequest
+        ) {
+          error.config.__isRetryRequest = true;
+          return axiosInstance(error.config);
+        }
+        return Promise.reject(error);
+      }
+    );
+
     if (!this.authToken) {
       const payload = {
         jsonrpc: "2.0",
         method: "user.login",
         params: {
-          username: USERNAME,
-          password: PASSWORD,
+          username: username,
+          password: password,
         },
         id: 1,
       };
@@ -72,7 +107,9 @@ class AuthService {
         if (response.data.result) {
           this.authToken = response.data.result;
         } else {
-          throw new Error(`Login error: ${JSON.stringify(response.data.error)}`);
+          throw new Error(
+            `Login error: ${JSON.stringify(response.data.error)}`
+          );
         }
       } catch (error) {
         console.error("Error during login:", error.message || error);
@@ -88,6 +125,53 @@ class AuthService {
 }
 
 const authService = new AuthService();
+
+export default authService;
+
+// class AuthService {
+//   constructor() {
+//     if (!AuthService.instance) {
+//       AuthService.instance = this;
+//       this.authToken = null;
+//     }
+//     return AuthService.instance;
+//   }
+
+//   async login(url, username, password) {
+//     if (!this.authToken) {
+//       const payload = {
+//         jsonrpc: "2.0",
+//         method: "user.login",
+//         params: {
+//           username: username,
+//           password: password,
+//         },
+//         id: 1,
+//       };
+
+//       try {
+//         const response = await axiosInstance.post("", payload);
+//         if (response.data.result) {
+//           this.authToken = response.data.result;
+//         } else {
+//           throw new Error(
+//             `Login error: ${JSON.stringify(response.data.error)}`
+//           );
+//         }
+//       } catch (error) {
+//         console.error("Error during login:", error.message || error);
+//         throw error;
+//       }
+//     }
+//     return this.authToken;
+//   }
+
+//   getToken() {
+//     return this.authToken;
+//   }
+// }
+
+// const authService = new AuthService();
 
 // Additional functions remain unchanged
 
@@ -304,10 +388,13 @@ const fetchDataHostProblems = async (authToken) => {
       const minutes = Math.floor(durationInMillis / (1000 * 60)) % 60;
       const hours = Math.floor(durationInMillis / (1000 * 60 * 60)) % 24;
       const days = Math.floor(durationInMillis / (1000 * 60 * 60 * 24)) % 30;
-      const months = Math.floor(durationInMillis / (1000 * 60 * 60 * 24 * 30)) % 12;
-      const years = Math.floor(durationInMillis / (1000 * 60 * 60 * 24 * 30 * 12));
+      const months =
+        Math.floor(durationInMillis / (1000 * 60 * 60 * 24 * 30)) % 12;
+      const years = Math.floor(
+        durationInMillis / (1000 * 60 * 60 * 24 * 30 * 12)
+      );
 
-      let durationString = '';
+      let durationString = "";
       if (years >= 1) {
         durationString += `${years}Y `;
       }
@@ -325,7 +412,7 @@ const fetchDataHostProblems = async (authToken) => {
       }
       durationString += `${seconds}s`;
 
-      durationString = durationString.replace(/,\s*$/, '');
+      durationString = durationString.replace(/,\s*$/, "");
 
       event.duration = durationString;
     });
@@ -418,10 +505,13 @@ const fetchGroupProblemDetails = async (authToken, gid) => {
       const minutes = Math.floor(durationInMillis / (1000 * 60)) % 60;
       const hours = Math.floor(durationInMillis / (1000 * 60 * 60)) % 24;
       const days = Math.floor(durationInMillis / (1000 * 60 * 60 * 24)) % 30;
-      const months = Math.floor(durationInMillis / (1000 * 60 * 60 * 24 * 30)) % 12;
-      const years = Math.floor(durationInMillis / (1000 * 60 * 60 * 24 * 30 * 12));
+      const months =
+        Math.floor(durationInMillis / (1000 * 60 * 60 * 24 * 30)) % 12;
+      const years = Math.floor(
+        durationInMillis / (1000 * 60 * 60 * 24 * 30 * 12)
+      );
 
-      let durationString = '';
+      let durationString = "";
       if (years >= 1) {
         durationString += `${years}Y `;
       }
@@ -439,7 +529,7 @@ const fetchGroupProblemDetails = async (authToken, gid) => {
       }
       durationString += `${seconds}s`;
 
-      durationString = durationString.replace(/,\s*$/, '');
+      durationString = durationString.replace(/,\s*$/, "");
 
       event.duration = durationString;
     });

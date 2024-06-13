@@ -14,20 +14,13 @@ import { fetchHostGroupProblems, authService } from "../services/apiHost";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const DashboardScreen = ({ navigation }) => {
+const DashboardScreen = () => {
   const [loading, setLoading] = useState(true);
   const [authToken, setAuthToken] = useState<string | null>(null);
-  const {
-    serverName,
-    serverHost,
-    username,
-    password,
-    httpUser,
-    httpPassword,
-    rememberMe,
-    useHttpAuth,
-  } = useLocalSearchParams();
+  const [credentials, setCredentials] = useState(null);
+  const { key } = useLocalSearchParams();
   const router = useRouter();
   const [tableData, setTableData] = useState([]);
   const [severityCount, setSeverityCount] = useState({
@@ -38,6 +31,24 @@ const DashboardScreen = ({ navigation }) => {
     Info: 0,
     "N/A": 0,
   });
+
+  useEffect(() => {
+    const loadCredentials = async () => {
+      try {
+        const keyString = Array.isArray(key) ? key[0] : key;
+        if (key) {
+          const storedCredentials = await AsyncStorage.getItem(keyString);
+          if (storedCredentials) {
+            setCredentials(JSON.parse(storedCredentials));
+          }
+        }
+      } catch (error) {
+        console.error("Error loading stored credentials", error);
+      }
+    };
+
+    loadCredentials();
+  }, [key]);
 
   const navigateToGroupProblems = (gid, gname) => {
     router.push({
@@ -98,10 +109,13 @@ const DashboardScreen = ({ navigation }) => {
 
   useEffect(() => {
     const initialize = async () => {
-      const token = await authService.login();
-      setAuthToken(token);
-      await fetchData(token);
-      setLoading(false);
+      if (credentials) {
+        const { serverHost, username, password, httpAuth } = credentials;
+        const token = await authService.login(serverHost, username, password);
+        setAuthToken(token);
+        await fetchData(token);
+        setLoading(false);
+      }
     };
 
     initialize();
@@ -113,7 +127,7 @@ const DashboardScreen = ({ navigation }) => {
     }, 30000); // Fetch data every 30 seconds
 
     return () => clearInterval(intervalId);
-  }, [authToken]);
+  }, [authToken, credentials]);
 
   const tableHead = ["Host Group", "Problems", "Total Hosts"];
 
@@ -135,11 +149,12 @@ const DashboardScreen = ({ navigation }) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-          <Ionicons name="menu" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Host Name</Text>
+        <Text style={styles.headerText}>
+          Server Name: {credentials?.serverName}
+        </Text>
+        <Text style={styles.headerText}>
+          Server URL: {credentials?.serverHost}
+        </Text>
         <TouchableOpacity
           onPress={() => fetchData(authToken)}
           style={styles.refreshButton}>
