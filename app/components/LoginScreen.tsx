@@ -318,6 +318,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { CheckBox } from "react-native-elements";
@@ -473,89 +474,91 @@ const LoginScreen = () => {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.branding}>ZApp</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Server Name"
-            value={serverName}
-            onChangeText={setServerName}
-            placeholderTextColor="#888"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Zabbix Url"
-            value={serverHost}
-            onChangeText={setServerHost}
-            placeholderTextColor="#888"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Zabbix User"
-            value={username}
-            onChangeText={setUsername}
-            placeholderTextColor="#888"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Zabbix Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor="#888"
-          />
-          <CheckBox
-            title="Use HTTP Authentication"
-            checked={useHttpAuth}
-            onPress={toggleHttpAuth}
-            containerStyle={styles.checkboxContainer}
-            textStyle={styles.checkboxLabel}
-          />
-          <Animated.View
-            style={[styles.httpAuthContainer, { height: httpFieldsHeight }]}>
-            {useHttpAuth && (
-              <>
-                <TextInput
-                  style={styles.input}
-                  placeholder="HTTP Username"
-                  value={httpUser}
-                  onChangeText={setHttpUser}
-                  placeholderTextColor="#888"
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="HTTP Password"
-                  value={httpPassword}
-                  onChangeText={setHttpPassword}
-                  secureTextEntry
-                  placeholderTextColor="#888"
-                />
-              </>
-            )}
-          </Animated.View>
-          <CheckBox
-            title="Remember Me"
-            checked={rememberMe}
-            onPress={() => setRememberMe(!rememberMe)}
-            containerStyle={styles.checkboxContainer}
-            textStyle={styles.checkboxLabel}
-          />
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.branding}>ZApp</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Server Name"
+              value={serverName}
+              onChangeText={setServerName}
+              placeholderTextColor="#888"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Zabbix Url"
+              value={serverHost}
+              onChangeText={setServerHost}
+              placeholderTextColor="#888"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Zabbix User"
+              value={username}
+              onChangeText={setUsername}
+              placeholderTextColor="#888"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Zabbix Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              placeholderTextColor="#888"
+            />
+            <CheckBox
+              title="Use HTTP Authentication"
+              checked={useHttpAuth}
+              onPress={toggleHttpAuth}
+              containerStyle={styles.checkboxContainer}
+              textStyle={styles.checkboxLabel}
+            />
+            <Animated.View
+              style={[styles.httpAuthContainer, { height: httpFieldsHeight }]}>
+              {useHttpAuth && (
+                <>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="HTTP Username"
+                    value={httpUser}
+                    onChangeText={setHttpUser}
+                    placeholderTextColor="#888"
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="HTTP Password"
+                    value={httpPassword}
+                    onChangeText={setHttpPassword}
+                    secureTextEntry
+                    placeholderTextColor="#888"
+                  />
+                </>
+              )}
+            </Animated.View>
+            <CheckBox
+              title="Remember Me"
+              checked={rememberMe}
+              onPress={() => setRememberMe(!rememberMe)}
+              containerStyle={styles.checkboxContainer}
+              textStyle={styles.checkboxLabel}
+            />
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Login</Text>
-          </TouchableOpacity>
-          {/* <TouchableOpacity
+            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+            {/* <TouchableOpacity
           style={styles.clearButton}
           onPress={clearAsyncStorage}>
           <Text style={styles.buttonText}>Clear Storage</Text>
         </TouchableOpacity> */}
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
