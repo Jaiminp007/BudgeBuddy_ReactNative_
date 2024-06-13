@@ -1,9 +1,5 @@
 import axios from "axios";
 
-// const SERVER_URL = "http://43.252.198.181";
-// const USERNAME = "Admin";
-// const PASSWORD = "Gfgnl@#123";
-
 const SERVER_URL = "https://nms.sanghviinfo.com";
 const USERNAME = "snv_monitor";
 const PASSWORD = "v4kUtbTYpeu6#9!a";
