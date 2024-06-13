@@ -436,41 +436,26 @@ const LoginScreen = () => {
   useEffect(() => {
     const loadStoredData = async () => {
       try {
-        const allKeys = await AsyncStorage.getAllKeys();
-        console.log("Stored keys:", allKeys);
-
-        for (const key of allKeys) {
+        const key = await AsyncStorage.getItem("current_key");
+        if (key) {
           const storedCredentials = await AsyncStorage.getItem(key);
-          console.log(`Key: ${key}, Value: ${storedCredentials}`);
           if (storedCredentials) {
-            const {
-              rememberMe,
-              serverName,
-              serverHost,
-              username,
-              password,
-              httpAuth,
-            } = JSON.parse(storedCredentials);
-            if (rememberMe) {
-              setServerName(serverName);
-              setServerHost(serverHost);
-              setUsername(username);
-              setPassword(password);
-              if (httpAuth) {
-                setHttpUser(httpAuth.httpUser);
-                setHttpPassword(httpAuth.httpPassword);
-                setUseHttpAuth(true);
-                Animated.timing(httpFieldsHeight, {
-                  toValue: 100,
-                  duration: 300,
-                  easing: Easing.ease,
-                  useNativeDriver: false,
-                }).start();
-              }
-              setRememberMe(true);
-            } else {
-              await AsyncStorage.removeItem(key);
-              console.log(`Removed key: ${key} from AsyncStorage`);
+            const { serverName, serverHost, username, password, httpAuth } =
+              JSON.parse(storedCredentials);
+            setServerName(serverName);
+            setServerHost(serverHost);
+            setUsername(username);
+            setPassword(password);
+            if (httpAuth) {
+              setHttpUser(httpAuth.httpUser);
+              setHttpPassword(httpAuth.httpPassword);
+              setUseHttpAuth(true);
+              Animated.timing(httpFieldsHeight, {
+                toValue: 100,
+                duration: 300,
+                easing: Easing.ease,
+                useNativeDriver: false,
+              }).start();
             }
           }
         }
