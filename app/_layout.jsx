@@ -22,9 +22,21 @@ const CustomHeaderLeft = () => {
 
 const CustomDrawerContent = (props) => {
   const { colors } = useTheme();
+
+  const handleLogout = async () => {
+    // Navigate to the login screen
+    props.navigation.navigate("login");
+
+    // Reload the app
+    props.navigation.reset({
+      index: 0,
+      routes: [{ name: "login" }],
+    });
+  };
+
   return (
     <View style={{ flex: 1 }}>
-      <View style={styles.userInfoSection}>
+      {/* <View style={styles.userInfoSection}>
         <Avatar.Image
           source={{
             uri: "https://placekitten.com/200/200",
@@ -33,7 +45,7 @@ const CustomDrawerContent = (props) => {
         />
         <Text style={styles.title}>John Doe</Text>
         <Text style={styles.caption}>@johndoe</Text>
-      </View>
+      </View> */}
       <DrawerContentScrollView {...props}>
         <DrawerItem
           icon={({ color, size }) => (
@@ -54,16 +66,14 @@ const CustomDrawerContent = (props) => {
             <Ionicons name="server-outline" color={color} size={size} />
           )}
           label="Host Screen"
-          onPress={() => props.navigation.navigate("hostDetailScreen")}
+          onPress={() => props.navigation.navigate("")}
         />
         <DrawerItem
           icon={({ color, size }) => (
             <Ionicons name="log-out-outline" color={color} size={size} />
           )}
           label="Logout"
-          onPress={() => {
-            /* Add your logout logic here */
-          }}
+          onPress={handleLogout}
         />
       </DrawerContentScrollView>
     </View>
@@ -103,7 +113,7 @@ export default function Layout() {
         }}
       />
       <Drawer.Screen
-        name="hostDetailScreen"
+        name="Host"
         options={{
           title: "Host Screen",
           headerLeft: () => <CustomHeaderLeft />,
