@@ -9,17 +9,24 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 import { ping, authService, traceroute } from "../services/apiHost";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
-const HostDetailScreen = () => {
+const ProblemDetailScreen = () => {
   const [authToken, setAuthToken] = useState<string | null>(null);
-  const [pingResponse, setPingResponse] = useState<{ response: string, value: string } | null>(null);
-  const [tracerouteResponse, setTracerouteResponse] = useState<{ response: string, value: string } | null>(null);
+  const [pingResponse, setPingResponse] = useState<{
+    response: string;
+    value: string;
+  } | null>(null);
+  const [tracerouteResponse, setTracerouteResponse] = useState<{
+    response: string;
+    value: string;
+  } | null>(null);
   const [loadingPing, setLoadingPing] = useState(false);
   const [loadingTraceroute, setLoadingTraceroute] = useState(false);
-  const { hostName, hostID, problemName, severity, duration } = useLocalSearchParams();
+  const { hostName, hostID, problemName, severity, duration } =
+    useLocalSearchParams();
   const navigation = useNavigation();
   console.log("Row Data", hostName, problemName, severity, duration);
 
@@ -28,7 +35,7 @@ const HostDetailScreen = () => {
     try {
       const token = await authService.login();
       setAuthToken(token);
-      const response = await ping(token, hostID);
+      const response = await ping(hostID);
       setPingResponse(response);
       console.log("Ping action triggered", response);
       if (response) {
@@ -44,7 +51,7 @@ const HostDetailScreen = () => {
     try {
       const token = await authService.login();
       setAuthToken(token);
-      const response = await traceroute(token, hostID);
+      const response = await traceroute(hostID);
       setTracerouteResponse(response);
       console.log("Traceroute action triggered", response);
       if (response) {
@@ -60,7 +67,7 @@ const HostDetailScreen = () => {
     console.log("Acknowledge action triggered");
   };
 
-  const severityColors = {
+  const severityColors: { [key: string]: string } = {
     Disaster: "#E57373",
     High: "#FF8A65",
     Average: "#FFB74D",
@@ -69,11 +76,10 @@ const HostDetailScreen = () => {
     "N/A": "#D3D3D3",
   };
 
+  const severityKey = Array.isArray(severity) ? severity[0] : severity;
+
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Host Details</Text>
-      </View>
       <View style={styles.content}>
         <Text style={styles.label}>Host Name:</Text>
         <Text style={styles.value}>{hostName}</Text>
@@ -85,15 +91,33 @@ const HostDetailScreen = () => {
         <Text style={styles.value}>{duration}</Text>
 
         <Text style={styles.label}>Severity:</Text>
-        <View style={[styles.severityBox, { backgroundColor: severityColors[severity] }]}>
-          <Text style={styles.severityText}>{severity}</Text>
+        <View
+          style={[
+            styles.severityBox,
+            { backgroundColor: severityColors[severityKey] },
+          ]}>
+          <Text style={styles.severityText}>{severityKey}</Text>
         </View>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={handlePing} style={styles.button} disabled={loadingPing}>
-            {loadingPing ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Ping</Text>}
+          <TouchableOpacity
+            onPress={handlePing}
+            style={styles.button}
+            disabled={loadingPing}>
+            {loadingPing ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Ping</Text>
+            )}
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleTraceroute} style={styles.button} disabled={loadingTraceroute}>
-            {loadingTraceroute ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Traceroute</Text>}
+          <TouchableOpacity
+            onPress={handleTraceroute}
+            style={styles.button}
+            disabled={loadingTraceroute}>
+            {loadingTraceroute ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Traceroute</Text>
+            )}
           </TouchableOpacity>
           <TouchableOpacity onPress={handleAcknowledge} style={styles.button}>
             <Text style={styles.buttonText}>Acknowledge</Text>
@@ -156,9 +180,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#007BFF",
     padding: 10,
     borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonText: {
     fontSize: 18,
@@ -167,4 +191,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HostDetailScreen;
+export default ProblemDetailScreen;

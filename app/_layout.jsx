@@ -66,7 +66,7 @@ const CustomDrawerContent = (props) => {
             <Ionicons name="server-outline" color={color} size={size} />
           )}
           label="Host Screen"
-          onPress={() => props.navigation.navigate("")}
+          onPress={() => props.navigation.navigate("host")}
         />
         <DrawerItem
           icon={({ color, size }) => (
@@ -113,7 +113,7 @@ export default function Layout() {
         }}
       />
       <Drawer.Screen
-        name="Host"
+        name="host"
         options={{
           title: "Host Screen",
           headerLeft: () => <CustomHeaderLeft />,
@@ -123,6 +123,14 @@ export default function Layout() {
         name="groupProblems"
         options={{
           title: "Group Problems",
+          headerLeft: () => <CustomHeaderLeft />,
+        }}
+      />
+
+      <Drawer.Screen
+        name="problemDetail"
+        options={{
+          title: "Problem Detail",
           headerLeft: () => <CustomHeaderLeft />,
         }}
       />

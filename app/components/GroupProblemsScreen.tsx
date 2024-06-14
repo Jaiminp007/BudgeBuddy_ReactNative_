@@ -1456,8 +1456,10 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import { fetchGroupProblemDetails, authService } from "../services/apiHost";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 const GroupProblemsScreen = () => {
+  const router = useRouter();
   const [tableData, setTableData] = useState([]);
   const [severityCount, setSeverityCount] = useState({
     Disaster: 0,
@@ -1470,6 +1472,25 @@ const GroupProblemsScreen = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [selectedSeverity, setSelectedSeverity] = useState(null);
   const { groupId, groupName } = useLocalSearchParams();
+
+  const navigateToHostDetails = (
+    hostName,
+    problemName,
+    severity,
+    duration,
+    hostID
+  ) => {
+    router.push({
+      pathname: "/problemDetail",
+      params: {
+        hostName,
+        problemName,
+        severity,
+        duration,
+        hostID,
+      },
+    });
+  };
 
   const fetchData = async () => {
     console.log("Detail Screen");
@@ -1614,7 +1635,18 @@ const GroupProblemsScreen = () => {
                   ))}
                 </View>
                 {filteredData.map((rowData, rowIndex) => (
-                  <View key={rowIndex} style={styles.tableRow}>
+                  <TouchableOpacity
+                    key={rowIndex}
+                    style={styles.tableRow}
+                    onPress={() =>
+                      navigateToHostDetails(
+                        rowData[0],
+                        rowData[1],
+                        rowData[2],
+                        rowData[3],
+                        groupId
+                      )
+                    }>
                     {rowData
                       .filter((_, index) => index !== 2) // Removing the severity column
                       .map((cellData, cellIndex) => (
@@ -1633,7 +1665,7 @@ const GroupProblemsScreen = () => {
                           {cellData}
                         </Text>
                       ))}
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
             )}
