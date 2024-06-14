@@ -119,6 +119,13 @@ export default function Layout() {
           headerLeft: () => <CustomHeaderLeft />,
         }}
       />
+      <Drawer.Screen
+        name="groupProblems"
+        options={{
+          title: "Group Problems",
+          headerLeft: () => <CustomHeaderLeft />,
+        }}
+      />
     </Drawer>
   );
 }
