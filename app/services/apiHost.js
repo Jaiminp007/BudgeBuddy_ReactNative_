@@ -909,6 +909,27 @@ const fetchHostDetails = async (gid) => {
   return await authService.makeRequest("host.get", params);
 };
 
+const fetchHostInterface = async () => {
+  const params = {
+    output: "extend",
+    selectHosts: ["hostid", "host"],
+    
+  };
+
+  return await authService.makeRequest("hostinterface.get", params);
+};
+
+const fetchHostStatus  = async (hostid) => {
+  const params = {
+    output: "extend",
+    hostids:hostid,
+    selectHostGroups: ["groupid", "name"],
+    
+  };
+
+  return await authService.makeRequest("host.get", params);
+};
+
 const fetchHostGroupDetails = async () => {
   const params = {
     output: "extend",
@@ -917,6 +938,8 @@ const fetchHostGroupDetails = async () => {
 
   return await authService.makeRequest("hostgroup.get", params);
 };
+
+
 
 const fetchGroupProblemDetails = async (gid) => {
   try {
@@ -1142,5 +1165,6 @@ export {
   fetchDataHostProblems,
 
   //
-  // fetchHostsInterface,
+  fetchHostInterface,
+  fetchHostStatus,
 };

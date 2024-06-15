@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ping, traceroute } from "../services/apiHost";
+import { ping, traceroute, fetchHostStatus } from "../services/apiHost";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
 const HostDetailScreen = () => {
@@ -25,10 +25,10 @@ const HostDetailScreen = () => {
   } | null>(null);
   const [loadingPing, setLoadingPing] = useState(false);
   const [loadingTraceroute, setLoadingTraceroute] = useState(false);
-  const { hostName, hostID, problemName, severity, duration } =
+  const {         hostID,hostName,hostIP,hostDNS, } =
     useLocalSearchParams();
   const navigation = useNavigation();
-  console.log("Row Data", hostName, problemName, severity, duration);
+  // console.log("Row Data", hostName, problemName, severity, duration);
 
   const handlePing = async () => {
     setLoadingPing(true);
@@ -69,7 +69,7 @@ const HostDetailScreen = () => {
     "N/A": "#D3D3D3",
   };
 
-  const severityKey = Array.isArray(severity) ? severity[0] : severity;
+  // const severityKey = Array.isArray(severity) ? severity[0] : severity;
 
   return (
     <ScrollView style={styles.container}>
@@ -77,14 +77,14 @@ const HostDetailScreen = () => {
         <Text style={styles.label}>Host Name:</Text>
         <Text style={styles.value}>{hostName}</Text>
 
-        <Text style={styles.label}>Host Interface:</Text>
-        <Text style={styles.value}>{problemName}</Text>
+        <Text style={styles.label}>Host IP:</Text>
+        <Text style={styles.value}>{hostIP}</Text>
 
-        <Text style={styles.label}>Host Group:</Text>
-        <Text style={styles.value}>{problemName}</Text>
+        <Text style={styles.label}>Host DNS:</Text>
+        <Text style={styles.value}>{hostDNS}</Text>
 
         <Text style={styles.label}>Status:</Text>
-        <Text style={styles.value}>{duration}</Text>
+        <Text style={styles.value}>{hostIP}</Text>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity

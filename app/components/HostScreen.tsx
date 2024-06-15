@@ -12,7 +12,7 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { fetchHostDetails } from "../services/apiHost";
+import { fetchHostInterface } from "../services/apiHost";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
@@ -21,80 +21,33 @@ const HostScreen = () => {
   const [tableData, setTableData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [severityCount, setSeverityCount] = useState({
-    Disaster: 0,
-    High: 0,
-    Average: 0,
-    Warning: 0,
-    Info: 0,
-    "N/A": 0,
-  });
-  const [selectedSeverity, setSelectedSeverity] = useState(null);
 
-  const navigateToHostDetails = (
-    hostName,
-    problemName,
-    severity,
-    duration,
-    hostID
-  ) => {
+  const navigateToHostDetails = (hostID, hostName, hostIP, hostDNS) => {
     router.push({
       pathname: "/hostDetail",
       params: {
-        hostName,
-        problemName,
-        severity,
-        duration,
         hostID,
+        hostName,
+        hostIP,
+        hostDNS,
       },
     });
   };
 
   const fetchData = async () => {
-    // const data = [];
-    const data = await fetchHostDetails();
-    console.log(data);
+    const data = await fetchHostInterface();
+    console.log("interface", data);
+
     const transformedData = data.map((event) => [
+      event.hosts[0]?.hostid || "Unknown ID",
       event.hosts[0]?.host || "Unknown Host",
-      event.name,
-      mapSeverity(event.severity),
-      event.duration,
-      event.hosts[0]?.hostid,
+      event.ip,
+      event.dns || "N/A",
+      
+      // event.dns === "Unknown DNS" ? "N/A" : event.dns,
     ]);
     setTableData(transformedData);
     setFilteredData(transformedData);
-
-    const counts = {
-      Disaster: 0,
-      High: 0,
-      Average: 0,
-      Warning: 0,
-      Info: 0,
-      "N/A": 0,
-    };
-
-    transformedData.forEach((row) => {
-      counts[row[2]]++;
-    });
-
-    setSeverityCount(counts);
-  };
-
-  const mapSeverity = (severity) => {
-    switch (severity) {
-      case "5":
-        return "Disaster";
-      case "4":
-        return "High";
-      case "3":
-        return "Average";
-      case "2":
-        return "Warning";
-      case "1":
-        return "Info";
-      default:
-        return "N/A";
-    }
   };
 
   useEffect(() => {
@@ -108,52 +61,19 @@ const HostScreen = () => {
   const handleSearch = (text) => {
     setSearchQuery(text);
     const filteredData = tableData.filter((row) =>
-      row[0].toLowerCase().includes(text.toLowerCase())
+      row[1].toLowerCase().includes(text.toLowerCase())
     );
     setFilteredData(filteredData);
   };
 
-  const handleSeveritySelection = (severity) => {
-    const newSeverity = selectedSeverity === severity ? null : severity;
-    setSelectedSeverity(newSeverity);
-
-    if (newSeverity) {
-      if (severityCount[newSeverity] > 0) {
-        const filtered = tableData.filter((row) => row[2] === newSeverity);
-        setFilteredData(filtered);
-      } else {
-        setFilteredData([]);
-      }
-    } else {
-      setFilteredData(tableData);
-    }
-  };
-
-  const tableHead = ["Host Name", "Problems", "Time"];
-
-  const severityColors = {
-    Disaster: "#E57373",
-    High: "#FF8A65",
-    Average: "#FFB74D",
-    Warning: "#FFF176",
-    Info: "#90CAF9",
-    "N/A": "#D3D3D3",
-  };
-
-  const selectedSeverityColors = {
-    Disaster: "#B71C1C",
-    High: "#D84315",
-    Average: "#F57C00",
-    Warning: "#FBC02D",
-    Info: "#1976D2",
-    "N/A": "#757575",
-  };
+  const tableHead = ["Host Name", "Host IP", "Host DNS"];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f8f9fa" }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <ScrollView style={styles.container}>
           <View style={styles.header}>
             <TextInput
@@ -168,38 +88,13 @@ const HostScreen = () => {
           </View>
 
           <View style={styles.content}>
-            <View style={styles.hugeRectangle}>
-              {Object.entries(severityCount).map(([severity, count]) => (
-                <TouchableOpacity
-                  key={severity}
-                  onPress={() => handleSeveritySelection(severity)}
-                  style={[
-                    styles.box,
-                    {
-                      backgroundColor:
-                        selectedSeverity === severity
-                          ? selectedSeverityColors[severity]
-                          : severityColors[severity],
-                    },
-                  ]}>
-                  <Text style={styles.boxNumber}>{count}</Text>
-                  <Text style={styles.boxText}>{severity}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
             {filteredData.length === 0 ? (
               <ActivityIndicator size="large" color="#007BFF" />
             ) : (
               <View style={styles.tableContainer}>
                 <View style={styles.tableRow}>
                   {tableHead.map((header, index) => (
-                    <Text
-                      key={index}
-                      style={[
-                        styles.tableHeader,
-                        index === 0 && styles.tableHeaderHost,
-                        index !== 0 && styles.tableHeaderSmall,
-                      ]}>
+                    <Text key={index} style={styles.tableHeader}>
                       {header}
                     </Text>
                   ))}
@@ -208,31 +103,17 @@ const HostScreen = () => {
                   <TouchableOpacity
                     key={rowIndex}
                     onPress={() =>
-                      navigateToHostDetails(
-                        rowData[0],
-                        rowData[1],
-                        rowData[2],
-                        rowData[3],
-                        rowData[4]
-                      )
-                    }>
+                      navigateToHostDetails(rowData[0], rowData[1], rowData[2], rowData[3])
+                    }
+                  >
                     <View key={rowIndex} style={styles.tableRow}>
                       {rowData
-                        .filter((_, index) => index !== 2 && index !== 4) // Filtering out the "Severity" column and hostID
-                        .map((cellData, cellIndex) => (
-                          <Text
-                            key={cellIndex}
-                            style={[
-                              styles.tableCell,
-                              cellIndex === 0 && styles.tableCellHost,
-                              cellIndex !== 0 && styles.tableCellSmall,
-                              cellIndex === 1 && {
-                                backgroundColor: severityColors[rowData[2]],
-                              }, // Color the "With problems" column
-                            ]}>
-                            {cellData}
-                          </Text>
-                        ))}
+                      .filter((_, index) => index !==0)
+                      .map((cellData, cellIndex) => (
+                        <Text key={cellIndex} style={styles.tableCell}>
+                          {cellData}
+                        </Text>
+                      ))}
                     </View>
                   </TouchableOpacity>
                 ))}
@@ -244,10 +125,6 @@ const HostScreen = () => {
     </SafeAreaView>
   );
 };
-
-const { width } = Dimensions.get("window");
-const boxFontSize = width / 35;
-const numberFontSize = width / 25;
 
 const styles = StyleSheet.create({
   container: {
@@ -291,33 +168,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  hugeRectangle: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  box: {
-    flex: 1,
-    height: 80,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 8,
-    marginHorizontal: 3,
-    padding: 2,
-  },
-  boxText: {
-    fontSize: boxFontSize,
-    fontWeight: "bold",
-    color: "#000",
-    textAlign: "center",
-  },
-  boxNumber: {
-    fontSize: numberFontSize,
-    fontWeight: "bold",
-    color: "#000",
-    textAlign: "center",
-  },
   tableContainer: {
     marginTop: 20,
     backgroundColor: "#fff",
@@ -332,48 +182,27 @@ const styles = StyleSheet.create({
   tableRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center", // Ensure alignment to the top
+    alignItems: "center",
     borderBottomWidth: 1,
     borderColor: "#ddd",
   },
   tableHeader: {
+    flex: 1,
     fontWeight: "bold",
     textAlign: "center",
     padding: 5,
     fontSize: 16,
     color: "#333",
   },
-  tableHeaderHost: {
-    flex: 2.5,
-    textAlign: "left",
-  },
-  tableHeaderSmall: {
-    flex: 1.5,
-  },
   tableCell: {
+    flex: 1,
     textAlign: "center",
     paddingVertical: 5,
     paddingHorizontal: 2,
     fontSize: 15,
     color: "#333",
     flexWrap: "wrap",
-    maxWidth: "100%",
-    justifyContent: "center", // Center vertically
-    alignItems: "center", // Center vertically
-  },
-  tableCellHost: {
-    flex: 2.5,
-    textAlign: "left",
-    flexWrap: "wrap",
-    maxWidth: "100%",
-    justifyContent: "center", // Center vertically
-    alignItems: "center", // Center vertically
-  },
-  tableCellSmall: {
-    flex: 1.5,
-    maxWidth: "100%",
-    justifyContent: "center", // Center vertically
-    alignItems: "center", // Center vertically
+    width: Dimensions.get('window').width / 4, // Set width dynamically based on screen size
   },
 });
 

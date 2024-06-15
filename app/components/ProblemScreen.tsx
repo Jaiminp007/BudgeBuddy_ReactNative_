@@ -352,7 +352,7 @@ const ProblemScreen = () => {
   });
   const [selectedSeverity, setSelectedSeverity] = useState(null);
 
-  const navigateToHostDetails = (
+  const navigateToProblemDetails = (
     hostName,
     problemName,
     severity,
@@ -527,7 +527,7 @@ const ProblemScreen = () => {
                   <TouchableOpacity
                     key={rowIndex}
                     onPress={() =>
-                      navigateToHostDetails(
+                      navigateToProblemDetails(
                         rowData[0],
                         rowData[1],
                         rowData[2],
@@ -679,6 +679,7 @@ const styles = StyleSheet.create({
     maxWidth: "100%",
     justifyContent: "center", // Center vertically
     alignItems: "center", // Center vertically
+    width:2,
   },
   tableCellHost: {
     flex: 2.5,
