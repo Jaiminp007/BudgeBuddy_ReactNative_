@@ -12,7 +12,7 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { fetchDataHostProblems } from "../services/apiHost";
+import { fetchHostDetails } from "../services/apiHost";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
@@ -51,8 +51,9 @@ const HostScreen = () => {
   };
 
   const fetchData = async () => {
-    const data = [];
-    // const data = await fetchDataHostProblems();
+    // const data = [];
+    const data = await fetchHostDetails();
+    console.log(data);
     const transformedData = data.map((event) => [
       event.hosts[0]?.host || "Unknown Host",
       event.name,

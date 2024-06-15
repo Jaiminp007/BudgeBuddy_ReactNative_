@@ -1454,7 +1454,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import { fetchGroupProblemDetails, authService } from "../services/apiHost";
+import { fetchGroupProblemDetails } from "../services/apiHost";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
@@ -1786,6 +1786,7 @@ const styles = StyleSheet.create({
     maxWidth: "100%",
     justifyContent: "center", // Center vertically
     alignItems: "center", // Center vertically
+    width: 5,
   },
   tableCellHost: {
     flex: 2.5,

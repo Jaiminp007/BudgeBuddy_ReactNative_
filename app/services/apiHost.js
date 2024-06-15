@@ -1091,6 +1091,42 @@ const fetchDataHostProblems = async () => {
   }
 };
 
+// For HostScreen
+
+// fetchHostDetails
+
+// const fetchHostsInterface = async () => {
+//   // const payload = {
+//   //   jsonrpc: "2.0",
+//   //   method: "hostinterface.get",
+//   //   params: {
+//   //     output: "ip",
+//   //     // hostids: hostId,
+//   //     selectHosts: ["hostid", "host"],
+//   //   },
+//   //   auth: authToken,
+//   //   id: 1,
+//   // };
+
+//   try {
+//     const response = await axiosInstance.post("", payload);
+//     // return response.data;
+//     const params = {
+//       output: "ip",
+//       // hostids: hostId,
+//       selectHosts: ["hostid", "host"],
+//     };
+//     return await authService.makeRequest("hostinterface.get", params);
+//   } catch (error) {
+//     console.error("Error fetching enabled hosts:", error);
+//     throw error;
+//   }
+// };
+
+// const Hostetail = async
+// get host id and host name
+// for that host id get hostIP, host interface, status from host interface
+
 export {
   authService,
   fetchProblems,
@@ -1104,4 +1140,7 @@ export {
   ping,
   traceroute,
   fetchDataHostProblems,
+
+  //
+  // fetchHostsInterface,
 };

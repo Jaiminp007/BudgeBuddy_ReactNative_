@@ -402,7 +402,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { fetchHostGroupProblems, authService } from "../services/apiHost";
+import {
+  fetchHostGroupProblems,
+  authService,
+  // fetchHostsInterface,
+} from "../services/apiHost";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -506,6 +510,9 @@ const DashboardScreen = () => {
           await authService.login(serverHost, username, password);
         }
         await fetchData();
+        // const datatest = fetchHostsInterface();
+
+        // console.log(datatest);
         setLoading(false);
       }
     };
@@ -564,7 +571,7 @@ const DashboardScreen = () => {
           <View style={styles.searchContainer}>
             <TextInput
               style={styles.searchInput}
-              placeholder="Search Host Name..."
+              placeholder="Search Host Group..."
               value={searchQuery}
               onChangeText={handleSearch}
             />

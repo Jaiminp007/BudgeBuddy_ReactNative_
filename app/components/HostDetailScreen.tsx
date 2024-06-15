@@ -10,10 +10,10 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { ping, authService, traceroute } from "../services/apiHost";
+import { ping, traceroute } from "../services/apiHost";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
-const ProblemDetailScreen = () => {
+const HostDetailScreen = () => {
   // const [authToken, setAuthToken] = useState<string | null>(null);
   const [pingResponse, setPingResponse] = useState<{
     response: string;
@@ -58,10 +58,7 @@ const ProblemDetailScreen = () => {
     }
   };
 
-  const handleAcknowledge = () => {
-    // Add logic for acknowledge action
-    console.log("Acknowledge action triggered");
-  };
+  const routeProblem = () => {};
 
   const severityColors: { [key: string]: string } = {
     Disaster: "#E57373",
@@ -80,20 +77,15 @@ const ProblemDetailScreen = () => {
         <Text style={styles.label}>Host Name:</Text>
         <Text style={styles.value}>{hostName}</Text>
 
-        <Text style={styles.label}>Problem Name:</Text>
+        <Text style={styles.label}>Host Interface:</Text>
         <Text style={styles.value}>{problemName}</Text>
 
-        <Text style={styles.label}>Duration:</Text>
+        <Text style={styles.label}>Host Group:</Text>
+        <Text style={styles.value}>{problemName}</Text>
+
+        <Text style={styles.label}>Status:</Text>
         <Text style={styles.value}>{duration}</Text>
 
-        <Text style={styles.label}>Severity:</Text>
-        <View
-          style={[
-            styles.severityBox,
-            { backgroundColor: severityColors[severityKey] },
-          ]}>
-          <Text style={styles.severityText}>{severityKey}</Text>
-        </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={handlePing}
@@ -115,8 +107,8 @@ const ProblemDetailScreen = () => {
               <Text style={styles.buttonText}>Traceroute</Text>
             )}
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleAcknowledge} style={styles.button}>
-            <Text style={styles.buttonText}>Acknowledge</Text>
+          <TouchableOpacity onPress={routeProblem} style={styles.button}>
+            <Text style={styles.buttonText}>Problem</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -187,4 +179,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProblemDetailScreen;
+export default HostDetailScreen;
