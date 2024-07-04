@@ -253,7 +253,6 @@ const HostScreen = () => {
       event.hosts[0]?.host || "Unknown Host",
       event.ip,
       event.dns || "N/A",
-      event.status,
     ]);
     setTableData(transformedData);
     setFilteredData(transformedData);
@@ -358,6 +357,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa",
+    paddingHorizontal: 8,
+    paddingVertical: 16,
   },
   header: {
     flexDirection: "row",
@@ -366,6 +367,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
+    borderRadius: 8,
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -381,20 +383,32 @@ const styles = StyleSheet.create({
     marginLeft: "auto",
   },
   searchContainer: {
-    padding: 10,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    marginTop: 10,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
   },
   searchInput: {
-    marginLeft: "2%",
-    backgroundColor: "#fff",
-    padding: 10,
-    borderRadius: 8,
+    height: 40,
+    borderColor: "#ddd",
     borderWidth: 1,
-    borderColor: "#ccc",
-    width: "85%",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: "#fff",
+    width: "90%",
   },
   content: {
     flex: 1,
-    padding: 16,
+    marginTop: 10,
   },
   tableContainer: {
     backgroundColor: "#fff",
@@ -428,30 +442,21 @@ const styles = StyleSheet.create({
     flex: 1.5,
   },
   tableCell: {
-    textAlign: "center",
     paddingVertical: 5,
     paddingHorizontal: 2,
     fontSize: 15,
     color: "#333",
     flexWrap: "wrap",
     maxWidth: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    width: 2,
+    textAlign: "center",
   },
   tableCellHost: {
     flex: 2.5,
     textAlign: "left",
-    flexWrap: "wrap",
-    maxWidth: "100%",
-    justifyContent: "center",
-    alignItems: "center",
   },
   tableCellSmall: {
     flex: 1.5,
-    maxWidth: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+    // textAlign: "center",
   },
 });
 

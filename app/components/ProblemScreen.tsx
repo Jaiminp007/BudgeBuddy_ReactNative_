@@ -318,7 +318,6 @@
 // });
 
 // export default ProblemScreen;
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -473,8 +472,8 @@ const ProblemScreen = () => {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}>
-        <ScrollView style={styles.container}>
-          <View style={styles.header}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <View style={styles.searchContainer}>
             <TextInput
               style={styles.searchInput}
               placeholder="Search Host Name..."
@@ -485,7 +484,6 @@ const ProblemScreen = () => {
               <Ionicons name="refresh" size={24} color="black" />
             </TouchableOpacity>
           </View>
-
           <View style={styles.content}>
             <View style={styles.hugeRectangle}>
               {Object.entries(severityCount).map(([severity, count]) => (
@@ -572,6 +570,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa",
+    paddingHorizontal: 8,
   },
   header: {
     flexDirection: "row",
@@ -593,24 +592,38 @@ const styles = StyleSheet.create({
   },
   refreshButton: {
     marginLeft: "auto",
+    marginRight: "auto",
   },
   searchContainer: {
-    padding: 10,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    marginTop: 10,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
   },
   searchInput: {
-    marginLeft: "2%",
-    backgroundColor: "#fff",
-    padding: 10,
-    borderRadius: 8,
+    height: 40,
+    borderColor: "#ddd",
     borderWidth: 1,
-    borderColor: "#ccc",
-    width: "85%",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: "#fff",
+    width: "90%",
   },
   content: {
     flex: 1,
-    padding: 16,
+    marginTop: 10,
   },
   hugeRectangle: {
+    marginTop: 15,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -679,7 +692,6 @@ const styles = StyleSheet.create({
     maxWidth: "100%",
     justifyContent: "center", // Center vertically
     alignItems: "center", // Center vertically
-    width:2,
   },
   tableCellHost: {
     flex: 2.5,

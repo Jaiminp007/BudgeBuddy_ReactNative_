@@ -1967,6 +1967,8 @@ const GroupProblemsScreen = () => {
     } else {
       setFilteredData(tableData);
     }
+
+    console.log(filteredData);
   };
 
   const tableHead = ["Host Name", "Problems", "Time"];

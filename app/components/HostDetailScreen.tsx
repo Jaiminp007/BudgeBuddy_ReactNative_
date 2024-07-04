@@ -263,8 +263,9 @@ const HostDetailScreen = () => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={navigateToHost} style={styles.backButton}>
-          <Ionicons name="return-down-back-outline" size={32} color="black" />
+          <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
+        <Text style={styles.headerText}>Back</Text>
       </View>
       <View style={styles.content}>
         <Text style={styles.label}>Host Name:</Text>
@@ -320,14 +321,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    // // backgroundColor: "#fff",
-    // // borderBottomWidth: 1,
-    // // // borderBottomColor: "#ddd",
-    // elevation: 2,
-    // // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 2,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   backButton: {
     padding: 10,
@@ -335,6 +336,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 18,
     fontWeight: "bold",
+    fontStyle: "italic",
     color: "#333",
     marginLeft: 10,
   },
@@ -359,7 +361,9 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#007BFF",
-    padding: 15,
+    // padding: 15,
+    paddingHorizontal: 5,
+    paddingVertical: 15,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",

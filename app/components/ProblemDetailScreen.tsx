@@ -468,7 +468,7 @@ const ProblemDetailScreen = () => {
   const handlePing = async () => {
     setLoadingPing(true);
     try {
-      const response = await ping(hostID);
+      const response = await ping(groupID);
       setPingResponse(response);
       console.log("Ping action triggered", response);
       if (response) {
@@ -482,7 +482,7 @@ const ProblemDetailScreen = () => {
   const handleTraceroute = async () => {
     setLoadingTraceroute(true);
     try {
-      const response = await traceroute(hostID);
+      const response = await traceroute(groupID);
       setTracerouteResponse(response);
       console.log("Traceroute action triggered", response);
       if (response) {
@@ -608,6 +608,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 18,
     fontWeight: "bold",
+    fontStyle: "italic",
     color: "#333",
     marginLeft: 10,
   },
@@ -642,7 +643,9 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#007BFF",
-    padding: 15,
+    //   padding: 15,
+    paddingHorizontal: 5,
+    paddingVertical: 15,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
@@ -650,7 +653,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#fff",
     fontWeight: "bold",
   },
