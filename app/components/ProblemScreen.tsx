@@ -351,6 +351,8 @@ const ProblemScreen = () => {
   });
   const [selectedSeverity, setSelectedSeverity] = useState(null);
 
+  const backPage = "problem";
+
   const navigateToProblemDetails = (
     hostName,
     problemName,
@@ -366,6 +368,7 @@ const ProblemScreen = () => {
         severity,
         duration,
         hostID,
+        backPage,
       },
     });
   };

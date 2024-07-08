@@ -447,6 +447,7 @@ const ProblemDetailScreen = () => {
     duration,
     groupID,
     groupName,
+    backPage,
   } = useLocalSearchParams();
   const router = useRouter();
 
@@ -468,7 +469,7 @@ const ProblemDetailScreen = () => {
   const handlePing = async () => {
     setLoadingPing(true);
     try {
-      const response = await ping(groupID);
+      const response = await ping(hostID);
       setPingResponse(response);
       console.log("Ping action triggered", response);
       if (response) {
@@ -482,7 +483,7 @@ const ProblemDetailScreen = () => {
   const handleTraceroute = async () => {
     setLoadingTraceroute(true);
     try {
-      const response = await traceroute(groupID);
+      const response = await traceroute(hostID);
       setTracerouteResponse(response);
       console.log("Traceroute action triggered", response);
       if (response) {
@@ -497,14 +498,21 @@ const ProblemDetailScreen = () => {
     console.log("Acknowledge action triggered");
   };
 
-  const navigateToGroupProblems = (groupID, groupName) => {
-    router.push({
-      pathname: "/groupProblems",
-      params: {
-        groupID,
-        groupName,
-      },
-    });
+  const navigateToGroupProblems = (groupID, groupName, backPage) => {
+    if (backPage == "groupProblems") {
+      router.push({
+        pathname: "/groupProblems",
+        params: {
+          groupID,
+          groupName,
+        },
+      });
+    }
+    if (backPage == "problem") {
+      router.push({
+        pathname: "/problem",
+      });
+    }
   };
 
   const severityColors = {
@@ -523,7 +531,9 @@ const ProblemDetailScreen = () => {
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity
-            onPress={() => navigateToGroupProblems(groupID, groupName)}
+            onPress={() =>
+              navigateToGroupProblems(groupID, groupName, backPage)
+            }
             style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>

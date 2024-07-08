@@ -1854,6 +1854,8 @@ const GroupProblemsScreen = () => {
   const { groupId, groupName } = useLocalSearchParams();
   const [loading, setLoading] = useState(true);
 
+  const backPage = "groupProblems";
+
   const navigateToHostDetails = (
     hostName,
     problemName,
@@ -1871,6 +1873,7 @@ const GroupProblemsScreen = () => {
         duration,
         groupId,
         groupName,
+        backPage,
       },
     });
   };
