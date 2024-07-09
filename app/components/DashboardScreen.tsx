@@ -448,11 +448,14 @@ const DashboardScreen = () => {
   }, []);
 
   const navigateToGroupProblems = (gid, gname) => {
+    //, hostIds
+    //  console.log("Navigating with Host IDs:", hostIds);
     router.push({
       pathname: "/groupProblems",
       params: {
         groupId: gid,
         groupName: gname,
+        //       hostIds: hostIds,
       },
     });
   };
@@ -480,10 +483,12 @@ const DashboardScreen = () => {
         await fetchHostGroupProblems();
       const transformedData = Object.entries(groupProblemCounts).map(
         ([groupID, { groupName, problemCount, totalHosts }]) => ({
+          //, hostIds
           gid: groupID,
           gname: groupName,
           pcount: problemCount,
           totalHosts: totalHosts,
+          //  hostIds: hostIds,
         })
       );
       setTableData(transformedData);
@@ -606,7 +611,11 @@ const DashboardScreen = () => {
                       <TouchableOpacity
                         key={rowIndex}
                         onPress={() =>
-                          navigateToGroupProblems(rowData.gid, rowData.gname)
+                          navigateToGroupProblems(
+                            rowData.gid,
+                            rowData.gname
+                            //           rowData.hostIds
+                          )
                         }>
                         <View key={rowIndex} style={styles.tableRow}>
                           <Text

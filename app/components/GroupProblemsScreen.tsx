@@ -1858,6 +1858,7 @@ const GroupProblemsScreen = () => {
 
   const navigateToHostDetails = (
     hostName,
+    hostID,
     problemName,
     severity,
     duration,
@@ -1868,9 +1869,11 @@ const GroupProblemsScreen = () => {
       pathname: "/problemDetail",
       params: {
         hostName,
+        hostID,
         problemName,
         severity,
         duration,
+
         groupId,
         groupName,
         backPage,
@@ -1896,6 +1899,7 @@ const GroupProblemsScreen = () => {
     const data = await fetchGroupProblemDetails(groupId);
     const transformedData = data.map((event) => [
       event.hosts[0]?.host || "Unknown Host",
+      event.hosts[0]?.hostid,
       event.name,
       mapSeverity(event.severity),
       event.duration,
@@ -2063,6 +2067,7 @@ const GroupProblemsScreen = () => {
                         rowData[1],
                         rowData[2],
                         rowData[3],
+                        rowData[4], // Pass hostid here
                         groupId,
                         groupName
                       )

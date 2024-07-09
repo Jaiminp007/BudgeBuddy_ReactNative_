@@ -1477,12 +1477,14 @@ const fetchHostGroupProblems = async () => {
         groupName: groupName,
         problemCount: filteredProblems.length,
         totalHosts: enabledHostIds.length,
+        //      hostIds: enabledHostIds,
       };
     } else {
       groupProblemCounts[groupId] = {
         groupName: groupName,
         problemCount: 0,
         totalHosts: 0,
+        //     hostIds: [],
       };
     }
   });
