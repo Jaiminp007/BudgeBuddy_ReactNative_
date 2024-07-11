@@ -241,6 +241,17 @@ const CustomDrawerContent = (props) => {
         />
         <DrawerItem
           icon={({ color, size }) => (
+            <Ionicons
+              name="chatbubble-ellipses-outline"
+              color={color}
+              size={size}
+            />
+          )}
+          label="Feedback"
+          onPress={() => props.navigation.navigate("feedback")}
+        />
+        <DrawerItem
+          icon={({ color, size }) => (
             <Ionicons name="log-out-outline" color={color} size={size} />
           )}
           label="Logout"
@@ -310,6 +321,14 @@ export default function Layout() {
         name="hostDetail"
         options={{
           title: "Host Detail",
+          headerLeft: () => <CustomHeaderLeft />,
+        }}
+      />
+
+      <Drawer.Screen
+        name="feedback"
+        options={{
+          title: "Feedback",
           headerLeft: () => <CustomHeaderLeft />,
         }}
       />
