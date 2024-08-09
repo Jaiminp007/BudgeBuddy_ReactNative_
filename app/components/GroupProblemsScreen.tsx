@@ -2073,7 +2073,7 @@ const GroupProblemsScreen = () => {
                       )
                     }>
                     {rowData
-                      .filter((_, index) => index !== 2) // Removing the severity column
+                      .filter((_, index) => index !== 3 && index!==1) // Removing the severity column
                       .map((cellData, cellIndex) => (
                         <Text
                           key={cellIndex}
@@ -2082,7 +2082,7 @@ const GroupProblemsScreen = () => {
                             cellIndex === 0 && styles.tableCellHost,
                             cellIndex !== 0 && styles.tableCellSmall,
                             cellIndex === 1 && {
-                              backgroundColor: severityColors[rowData[2]],
+                              backgroundColor: severityColors[rowData[3]],
                             },
                           ]}
                           numberOfLines={0} // Allow unlimited lines

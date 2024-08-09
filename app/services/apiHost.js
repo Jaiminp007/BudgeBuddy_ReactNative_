@@ -1286,16 +1286,34 @@ const authService = new AuthService();
 
 const fetchProblems = async (hostIds) => {
   const params = {
-    output: ["triggerids", "objectid", "clock", "severity"],
+    // output: ["triggerids", "objectid", "clock", "severity"],
+    output: "extend",
     hostids: hostIds,
   };
-
+  // const test=await authService.makeRequest("problem.get", params);
+  
   return await authService.makeRequest("problem.get", params);
 };
 
-const ping = async (hostId) => {
+const scriptnames = async () => {
   const params = {
-    scriptid: "1",
+    output: ["scriptid","name"],
+  };
+  // const test=await authService.makeRequest("problem.get", params);
+  
+  return await authService.makeRequest("script.get", params);
+};
+
+
+const ping = async (hostId) => {
+  const pscript = await scriptnames();
+  const pingScript = pscript.find(script => script.name === "Ping");
+
+// Extract the scriptid if found
+  const pingScriptId = pingScript ? pingScript.scriptid : null;
+  console.log("pscript1",pingScriptId);
+  const params = {
+    scriptid: pingScriptId,
     hostid: hostId,
   };
 
@@ -1303,8 +1321,14 @@ const ping = async (hostId) => {
 };
 
 const traceroute = async (hostId) => {
+  const pscript = await scriptnames();
+  const traceScript = pscript.find(script => script.name === "Traceroute");
+
+  // Extract the scriptid if found
+  const traceScriptId = traceScript ? traceScript.scriptid : null;
+  console.log("pscriptt",traceScriptId);
   const params = {
-    scriptid: "2",
+    scriptid: traceScriptId,
     hostid: hostId,
   };
 
@@ -1328,9 +1352,10 @@ const fetchEvents = async (eventIds) => {
     eventids: eventIds,
     sortfield: ["clock"],
     selectHosts: ["hostid", "host"],
-    suppressed: 0,
+    // suppressed: 0,
   };
-
+  const test=await authService.makeRequest("event.get", params);
+  console.log("test",test)
   return await authService.makeRequest("event.get", params);
 };
 
@@ -1401,8 +1426,10 @@ const fetchGroupProblemDetails = async (gid) => {
     const filteredProblems = problemDetail.filter((problem) =>
       activeTriggers.includes(problem.objectid)
     );
-
+    // console.log("problog",filteredProblems);
     const eventIds = filteredProblems.map((detail) => detail.eventid);
+    console.log("eventidlog",eventIds);
+
     const eventAll = await fetchEvents(eventIds);
 
     eventAll.forEach((event) => {
@@ -1515,7 +1542,9 @@ const fetchDataHostProblems = async () => {
 
     const eventIds = filteredProblems.map((detail) => detail.eventid);
     const eventAll = await fetchEvents(eventIds);
-
+    // const filteredevent = eventAll.filter((event) =>
+    //   activeTriggers.includes(event.eventid)
+    // );
     eventAll.forEach((event) => {
       const eventTime = parseInt(event.clock) * 1000;
       const currentTime = new Date().getTime();
