@@ -681,6 +681,7 @@ const LoginScreen = () => {
   const [httpUser, setHttpUser] = useState("");
   const [httpPassword, setHttpPassword] = useState("");
   const [httpFieldsHeight] = useState(new Animated.Value(0));
+  const [loginError, setLoginError] = useState("");
   const router = useRouter();
 
   const loadStoredData = async () => {
@@ -743,6 +744,7 @@ const LoginScreen = () => {
     setUseHttpAuth(false);
     setHttpUser("");
     setHttpPassword("");
+    setLoginError("");
     //   setHttpFieldsHeight(new Animated.Value(0));
 
     // Fetch fresh data
@@ -784,7 +786,9 @@ const LoginScreen = () => {
       });
     } catch (error) {
       console.error("Error during login", error);
-      // setError("Login failed. Please check your credentials and try again.");
+      setLoginError(
+        "Login failed. Please check your credentials and try again."
+      );
     }
   };
 
@@ -896,6 +900,10 @@ const LoginScreen = () => {
               textStyle={styles.checkboxLabel}
             />
 
+            {loginError ? (
+              <Text style={styles.errorText}>{loginError}</Text>
+            ) : null}
+
             <TouchableOpacity style={styles.button} onPress={handleLogin}>
               <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
@@ -931,6 +939,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: "#f0f4f7",
   },
+  errorText: {
+    color: "#ff4d4f", // A softer red color
+    backgroundColor: "#ffe6e6", // Light red background
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 20,
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "bold",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2, // Adds a subtle shadow on Android
+  },
+
   branding: {
     fontSize: 32,
     fontWeight: "bold",
