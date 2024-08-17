@@ -1,9 +1,9 @@
 import React from "react";
 import { Drawer } from "expo-router/drawer";
 import { Ionicons } from "@expo/vector-icons";
-import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { useNavigation, DrawerActions } from "@react-navigation/native";
-import { Avatar, useTheme } from "react-native-paper";
+import { useTheme } from "react-native-paper";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { Slot, useSegments } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -42,16 +42,6 @@ const CustomDrawerContent = (props) => {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* <View style={styles.userInfoSection}>
-        <Avatar.Image
-          source={{
-            uri: "https://placekitten.com/200/200",
-          }}
-          size={50}
-        />
-        <Text style={styles.title}>John Doe</Text>
-        <Text style={styles.caption}>@johndoe</Text>
-      </View> */}
       <DrawerContentScrollView {...props}>
         <DrawerItem
           icon={({ color, size }) => (
@@ -60,7 +50,6 @@ const CustomDrawerContent = (props) => {
           label="Dashboard"
           onPress={() => props.navigation.navigate("dashboard")}
         />
-
         <DrawerItem
           icon={({ color, size }) => (
             <Ionicons
@@ -94,7 +83,8 @@ export default function Layout() {
         headerLeft: isLoginRoute ? null : () => <CustomHeaderLeft />,
         headerShown: !isLoginRoute, // Hide header on login route
       })}
-      drawerContent={(props) => <CustomDrawerContent {...props} />}>
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+    >
       <Drawer.Screen
         name="login"
         options={{
@@ -105,8 +95,8 @@ export default function Layout() {
       <Drawer.Screen
         name="dashboard"
         options={{
-          title: "Dashboard",
-          headerLeft: () => <CustomHeaderLeft />,
+          title: null, // Remove the "Dashboard" title
+          headerShown: false, // Remove the entire header including the menu icon
         }}
       />
       <Drawer.Screen
@@ -120,11 +110,10 @@ export default function Layout() {
       <Drawer.Screen
         name="page2"
         options={{
-          title: "Dashboard",
-          headerLeft: () => <CustomHeaderLeft />, // Remove the menu icon
+          title: null, // Remove the "Dashboard" title
+          headerShown: false, // Remove the entire header including the menu icon
         }}
       />
-
       <Drawer.Screen
         name="feedback"
         options={{
