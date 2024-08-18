@@ -11,7 +11,8 @@ import menuIcon from "../../assets/MenuIcon.png";
 import addIcon from "../../assets/AddIcon.png";
 import { DrawerActions } from "@react-navigation/native";
 import { useRouter } from 'expo-router';
-
+const userId="1234"
+const name="Jaimini"
 const lightGreen = "#7ae582";
 const darkGreen = "#40916c";
 const black = "#040303";
@@ -19,7 +20,7 @@ const white = "#ffffff";
 const blue = "#264653";
 const yellow = "#ffb703";
 
-const MainScreen = ({ cashAmount }) => {  // Accept cashAmount as a prop
+const MainScreen = ({ cashAmount}) => {  // Accept cashAmount as a prop
   const router = useRouter();
   const navigation = useNavigation();
 
@@ -34,16 +35,13 @@ const MainScreen = ({ cashAmount }) => {  // Accept cashAmount as a prop
   const handleMenuPress = () => {
     navigation.dispatch(DrawerActions.openDrawer()); // Opens the drawer
   };
-  
-  const user = "Jaimin";
-  const userId = "12345";
 
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTextContainer}>
-          <Text style={styles.headerText}>Hello {String(user)}</Text>
+          <Text style={styles.headerText}>Hello {String(name)}</Text>
           <Text style={styles.idText}>ID: {String(userId)}</Text>
         </View>
         <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>

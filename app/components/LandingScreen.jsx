@@ -3,17 +3,18 @@ import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
   ScrollView,
   TextInput,
   TouchableOpacity,
   Alert,
+  Dimensions,
   Image,
   SafeAreaView,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -24,19 +25,109 @@ import euroIcon from "../../assets/EuroIcon.png"; // Adjust the path based on yo
 import poundIcon from "../../assets/PoundIcon.png"; // Adjust the path based on your folder structure
 import logo from "../../assets/Logo.png"; // Adjust the path based on your folder structure
 
+const lightGreen = "#7ae582";
+const darkGreen = "#40916c";
+const black = "#040303";
+const white = "#ffffff";
+const blue = "#264653";
+const yellow = "#ffb703";
+const background ="#dddddd";
+
 const LandingScreen = () => {
+  const [name, setName] = useState('Jaimin');
+  const [username, setUsername] = useState('Jaimin007');
+  const [password, setPassword] = useState('Patel');
+  const [userId, setUserId] = useState('609');
   const [loading, setLoading] = useState(true);
   const [value, setValue] = useState("");
   const [currencyIcon, setCurrencyIcon] = useState(rupeeIcon); // Default currency icon
   const router = useRouter();
 
+  // Function to clear all data
+  const clearAllData = async () => {
+    try {
+      await AsyncStorage.clear();
+      console.log('All data cleared successfully');
+      Alert.alert("All data cleared successfully!");
+    } catch (e) {
+      console.log('Failed to clear data', e);
+    }
+  };
+
+  // Function to retrieve and log data manually
+  const retrieveData = async () => {
+    try {
+      const values = await AsyncStorage.multiGet(['name', 'username', 'password', 'userId', 'cashAmount', 'selectedCurrencyIcon']);
+      
+      const savedName = values[0][1];
+      const savedUsername = values[1][1];
+      const savedPassword = values[2][1];
+      const savedUserId = values[3][1];
+      const savedCashAmount = values[4][1];
+      const savedCurrencyIcon = values[5][1];
+
+      console.log('--- Retrieved Data ---');
+      console.log('Name:', savedName);
+      console.log('Username:', savedUsername);
+      console.log('Password:', savedPassword);
+      console.log('User ID:', savedUserId);
+      console.log('Cash Amount:', savedCashAmount);
+      console.log('Selected Currency Icon:', savedCurrencyIcon);
+
+      if (savedName) setName(savedName);
+      if (savedUsername) setUsername(savedUsername);
+      if (savedPassword) setPassword(savedPassword);
+      if (savedUserId) setUserId(savedUserId);
+      if (savedCashAmount) setValue(savedCashAmount);
+
+      // Mapping string to the corresponding image
+      if (savedCurrencyIcon === "../../assets/RupeeIcon.png") {
+        setCurrencyIcon(rupeeIcon);
+      } else if (savedCurrencyIcon === "../../assets/DollarIcon.png") {
+        setCurrencyIcon(dollarIcon);
+      } else if (savedCurrencyIcon === "../../assets/EuroIcon.png") {
+        setCurrencyIcon(euroIcon);
+      } else if (savedCurrencyIcon === "../../assets/PoundIcon.png") {
+        setCurrencyIcon(poundIcon);
+      }
+
+    } catch (e) {
+      console.log('Failed to retrieve the data from the storage:', e);
+    }
+  };
+
   useEffect(() => {
-    setLoading(false); // Stop the loading animation when the component is ready
+    setLoading(false),
+    retrieveData(); // Automatically retrieve data when the component mounts
   }, []);
 
-  const handleNavigation = () => {
+  const handleNavigation = async () => {
     if (value) {  // Ensure value is not empty
       console.log("Navigating with cashAmount:", value);
+      try {
+        let iconPath;
+        if (currencyIcon === rupeeIcon) {
+          iconPath = "../../assets/RupeeIcon.png";
+        } else if (currencyIcon === dollarIcon) {
+          iconPath = "../../assets/DollarIcon.png";
+        } else if (currencyIcon === euroIcon) {
+          iconPath = "../../assets/EuroIcon.png";
+        } else if (currencyIcon === poundIcon) {
+          iconPath = "../../assets/PoundIcon.png";
+        }
+
+        await AsyncStorage.multiSet([
+          ['name', name],
+          ['username', username],
+          ['password', password],
+          ['userId', userId],
+          ['cashAmount', value],
+          ['selectedCurrencyIcon', iconPath]
+        ]);
+        console.log('Data successfully stored');
+      } catch (e) {
+        console.log('Failed to save the data to the storage');
+      }
       router.push({
         pathname: "/LandingPage",  // Ensure this route is correct
         params: { cashAmount: value }  // Correct way to pass params
@@ -45,7 +136,7 @@ const LandingScreen = () => {
       Alert.alert("Please enter a valid cash amount");
     }
   };
-  
+
   const handleInputChange = (input) => {
     if (/^\d*$/.test(input)) {
       setValue(input);
@@ -81,6 +172,14 @@ const LandingScreen = () => {
       { cancelable: true }
     );
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#40916c" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f8f9fa" }}>
@@ -118,6 +217,17 @@ const LandingScreen = () => {
                   <Text style={styles.buttonText}>Begin your Journey</Text>
                 </TouchableOpacity>
               </View>
+              <TouchableOpacity
+                style={styles.printButton}
+                onPress={retrieveData}>  {/* Call retrieveData manually */}
+                <Text style={styles.buttonText}>View Stored Data</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.delbutton}
+                onPress={clearAllData}>  {/* Call clearAllData to delete all data */}
+                <Text style={styles.buttonText}>Delete Data</Text>
+              </TouchableOpacity>
+
             </View>
           </TouchableWithoutFeedback>
         </ScrollView>
@@ -126,13 +236,10 @@ const LandingScreen = () => {
   );
 };
 
-const { width } = Dimensions.get("window");
-const boxFontSize = width / 35;
-const numberFontSize = width / 25;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
+    backgroundColor: background,
     flexGrow: 1,
     paddingVertical: 16,
     paddingHorizontal: 8,
@@ -149,7 +256,7 @@ const styles = StyleSheet.create({
   },
   textOne: {
     fontSize: 18,
-    color: "#40916c",
+    color: darkGreen,
     textAlign: "center",
     paddingLeft: 20,
     paddingRight: 20,
@@ -158,7 +265,7 @@ const styles = StyleSheet.create({
   },
   textTwo: {
     fontSize: 20,
-    color: "#7ae582",
+    color: blue,
     fontWeight: "bold",
     textAlign: "center",
     paddingLeft: 20,
@@ -186,7 +293,7 @@ const styles = StyleSheet.create({
     padding: 8,
     fontSize: 18,
     borderRadius: 4,
-    color: "black",
+    color: black,
     fontFamily: "Helvetica",
   },
   buttonContainer: {
@@ -212,6 +319,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  delbutton:{
+    marginTop: 20,
+    width: "20%",
+    height: "10%",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 6,
+    backgroundColor: "red",
+  },
+  printButton: {
+    marginTop: 10,
+    width: "20%",
+    height: "10%",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 6,
+    backgroundColor: "blue",
+  }
 });
 
 export default LandingScreen;
