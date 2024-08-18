@@ -28,7 +28,6 @@ const CustomDrawerContent = (props) => {
   const handleLogout = async () => {
     // Clear the auth token and credentials from memory and AsyncStorage
     authService.logout();
-    // await AsyncStorage.clear();
 
     // Navigate to the login screen
     props.navigation.navigate("login");
@@ -48,7 +47,7 @@ const CustomDrawerContent = (props) => {
             <Ionicons name="home-outline" color={color} size={size} />
           )}
           label="Dashboard"
-          onPress={() => props.navigation.navigate("dashboard")}
+          onPress={() => props.navigation.navigate("MainPage")}
         />
         <DrawerItem
           icon={({ color, size }) => (
@@ -83,6 +82,8 @@ export default function Layout() {
         headerLeft: isLoginRoute ? null : () => <CustomHeaderLeft />,
         headerShown: !isLoginRoute, // Hide header on login route
       })}
+      drawerPosition="right"  // Set drawer position to right
+      drawerType="slide"      // Ensure slide type for the drawer
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
       <Drawer.Screen
@@ -93,14 +94,14 @@ export default function Layout() {
         }}
       />
       <Drawer.Screen
-        name="dashboard"
+        name="MainPage"
         options={{
-          title: null, // Remove the "Dashboard" title
+          title: null, // Remove the "MainPage" title
           headerShown: false, // Remove the entire header including the menu icon
         }}
       />
       <Drawer.Screen
-        name="page1"
+        name="LandingPage"
         options={{
           title: null,
           drawerLockMode: "locked-closed", // Prevent drawer from opening
@@ -108,9 +109,9 @@ export default function Layout() {
         }}
       />
       <Drawer.Screen
-        name="page2"
+        name="ExpensePage"
         options={{
-          title: null, // Remove the "Dashboard" title
+          title: null, // Remove the "MainPage" title
           headerShown: false, // Remove the entire header including the menu icon
         }}
       />

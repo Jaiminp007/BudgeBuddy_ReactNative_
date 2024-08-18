@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import menuIcon from "../../assets/MenuIcon.png"; 
 import addIcon from "../../assets/AddIcon.png";
+import { DrawerActions } from "@react-navigation/native";
+import { useRouter } from 'expo-router';
 
 const lightGreen = "#7ae582";
 const darkGreen = "#40916c";
@@ -17,21 +19,31 @@ const white = "#ffffff";
 const blue = "#264653";
 const yellow = "#ffb703";
 
-const MainScreen = () => {
-  const navigation = useNavigation(); // Hook for navigation
+const MainScreen = ({ cashAmount }) => {  // Accept cashAmount as a prop
+  const router = useRouter();
+  const navigation = useNavigation();
+
+  const [currentCashAmount, setCurrentCashAmount] = useState(cashAmount);
+
+  useEffect(() => {
+    if (cashAmount !== undefined) {
+      setCurrentCashAmount(cashAmount);  // Update state with the new cashAmount
+    }
+  }, [cashAmount]);
 
   const handleMenuPress = () => {
- // Open the drawer
+    navigation.dispatch(DrawerActions.openDrawer()); // Opens the drawer
   };
+  
+  const user = "Jaimin";
+  const userId = "12345";
 
-  const userId = "12345"; // Placeholder for user ID
-  const cashAmount = "5000"; // Placeholder for cash amount
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTextContainer}>
-          <Text style={styles.headerText}>Hello User</Text>
+          <Text style={styles.headerText}>Hello {String(user)}</Text>
           <Text style={styles.idText}>ID: {String(userId)}</Text>
         </View>
         <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
@@ -42,7 +54,7 @@ const MainScreen = () => {
       <View style={styles.row}>
         <View style={styles.box}>
           <Text style={styles.boxTextHeading}>Cash Amount</Text>
-          <Text style={styles.boxTextPara}>{String(cashAmount)}</Text>
+          <Text style={styles.boxTextPara}>{String(currentCashAmount)}</Text>
         </View>
 
         <View style={styles.box}>
@@ -56,8 +68,10 @@ const MainScreen = () => {
 
       <View style={styles.wideBox}>
         <TouchableOpacity
-          onPress={() => navigation.navigate("page3")}
-        >
+          onPress={() => router.push({
+            pathname: '/ExpensePage',
+            params: { cashAmount: currentCashAmount },  // Pass cashAmount to ExpensePage
+          })}>
           <View style={styles.circle}>
             <Image source={addIcon} style={styles.addIcon} />
           </View>
@@ -65,7 +79,7 @@ const MainScreen = () => {
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

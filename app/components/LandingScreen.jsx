@@ -24,7 +24,7 @@ import euroIcon from "../../assets/EuroIcon.png"; // Adjust the path based on yo
 import poundIcon from "../../assets/PoundIcon.png"; // Adjust the path based on your folder structure
 import logo from "../../assets/Logo.png"; // Adjust the path based on your folder structure
 
-const Page1 = () => {
+const LandingScreen = () => {
   const [loading, setLoading] = useState(true);
   const [value, setValue] = useState("");
   const [currencyIcon, setCurrencyIcon] = useState(rupeeIcon); // Default currency icon
@@ -34,6 +34,18 @@ const Page1 = () => {
     setLoading(false); // Stop the loading animation when the component is ready
   }, []);
 
+  const handleNavigation = () => {
+    if (value) {  // Ensure value is not empty
+      console.log("Navigating with cashAmount:", value);
+      router.push({
+        pathname: "/LandingPage",  // Ensure this route is correct
+        params: { cashAmount: value }  // Correct way to pass params
+      }); // Pass cashAmount to MainPage.jsx
+    } else {
+      Alert.alert("Please enter a valid cash amount");
+    }
+  };
+  
   const handleInputChange = (input) => {
     if (/^\d*$/.test(input)) {
       setValue(input);
@@ -102,7 +114,7 @@ const Page1 = () => {
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => router.push("/page2", { cashAmount: value })}>
+                  onPress={handleNavigation}>
                   <Text style={styles.buttonText}>Begin your Journey</Text>
                 </TouchableOpacity>
               </View>
@@ -120,6 +132,7 @@ const numberFontSize = width / 25;
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "white",
     flexGrow: 1,
     paddingVertical: 16,
     paddingHorizontal: 8,
@@ -173,10 +186,11 @@ const styles = StyleSheet.create({
     padding: 8,
     fontSize: 18,
     borderRadius: 4,
-    color: "#ffffff",
+    color: "black",
     fontFamily: "Helvetica",
   },
   buttonContainer: {
+    color: "black",
     marginTop: 50,
     width: "50%",
     height: 60,
@@ -200,4 +214,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Page1;
+export default LandingScreen;

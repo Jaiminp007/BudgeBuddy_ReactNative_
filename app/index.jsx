@@ -3,9 +3,9 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import Login from "./login"; // Ensure this path is correct
-import Page2 from "./page2";
-import Page1Screen from "./page1";
+import Page2 from "./MainPage";
+import LandingScreen from "./components/LandingScreen";
 
 export default function App() {
-  return <Page1Screen />;
+  return <LandingScreen />;
 }
