@@ -53,19 +53,25 @@ const LandingScreen = () => {
       console.log('Failed to clear data', e);
     }
   };
-
-  // Function to retrieve and log data manually
+  
   const retrieveData = async () => {
     try {
-      const values = await AsyncStorage.multiGet(['name', 'username', 'password', 'userId', 'cashAmount', 'selectedCurrencyIcon']);
-      
+      const values = await AsyncStorage.multiGet([
+        'name',
+        'username',
+        'password',
+        'userId',
+        'cashAmount',
+        'selectedCurrencyIcon'
+      ]);
+  
       const savedName = values[0][1];
       const savedUsername = values[1][1];
       const savedPassword = values[2][1];
       const savedUserId = values[3][1];
       const savedCashAmount = values[4][1];
       const savedCurrencyIcon = values[5][1];
-
+  
       console.log('--- Retrieved Data ---');
       console.log('Name:', savedName);
       console.log('Username:', savedUsername);
@@ -73,33 +79,49 @@ const LandingScreen = () => {
       console.log('User ID:', savedUserId);
       console.log('Cash Amount:', savedCashAmount);
       console.log('Selected Currency Icon:', savedCurrencyIcon);
-
+  
+      // Update state only if values are not null or undefined
       if (savedName) setName(savedName);
       if (savedUsername) setUsername(savedUsername);
       if (savedPassword) setPassword(savedPassword);
       if (savedUserId) setUserId(savedUserId);
       if (savedCashAmount) setValue(savedCashAmount);
-
-      // Mapping string to the corresponding image
-      if (savedCurrencyIcon === "../../assets/RupeeIcon.png") {
-        setCurrencyIcon(rupeeIcon);
-      } else if (savedCurrencyIcon === "../../assets/DollarIcon.png") {
-        setCurrencyIcon(dollarIcon);
-      } else if (savedCurrencyIcon === "../../assets/EuroIcon.png") {
-        setCurrencyIcon(euroIcon);
-      } else if (savedCurrencyIcon === "../../assets/PoundIcon.png") {
-        setCurrencyIcon(poundIcon);
+  
+      // Ensure the currency icon is set to a valid image, default to rupeeIcon if not
+      if (savedCurrencyIcon) {
+        switch (savedCurrencyIcon) {
+          case "../../assets/RupeeIcon.png":
+            setCurrencyIcon(rupeeIcon);
+            break;
+          case "../../assets/DollarIcon.png":
+            setCurrencyIcon(dollarIcon);
+            break;
+          case "../../assets/EuroIcon.png":
+            setCurrencyIcon(euroIcon);
+            break;
+          case "../../assets/PoundIcon.png":
+            setCurrencyIcon(poundIcon);
+            break;
+          default:
+            setCurrencyIcon(rupeeIcon); // Default fallback to rupeeIcon
+            break;
+        }
+      } else {
+        setCurrencyIcon(rupeeIcon); // Default to rupeeIcon if no value is found
       }
-
-    } catch (e) {
+  
+    }  catch (e) {
       console.log('Failed to retrieve the data from the storage:', e);
+    } finally {
+      setLoading(false); // Set loading to false after retrieval
     }
   };
-
+  
   useEffect(() => {
-    setLoading(false),
     retrieveData(); // Automatically retrieve data when the component mounts
   }, []);
+  
+  
 
   const handleNavigation = async () => {
     if (value) {  // Ensure value is not empty
@@ -210,21 +232,28 @@ const LandingScreen = () => {
                   placeholder="Type a number"
                 />
               </View>
+
+              <View style={styles.currencyContainer}>
+                <Text style={styles.currencyText}>
+                  ↑ Press here to access multiple currencies
+                </Text>
+              </View>
+
               <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={handleNavigation}>
-                  <Text style={styles.buttonText}>Begin your Journey</Text>
-                </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleNavigation}>
+                <Text style={styles.buttonText}>Begin your Journey</Text>
+              </TouchableOpacity>
               </View>
               <TouchableOpacity
                 style={styles.printButton}
-                onPress={retrieveData}>  {/* Call retrieveData manually */}
+                onPress={retrieveData}>  
                 <Text style={styles.buttonText}>View Stored Data</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.delbutton}
-                onPress={clearAllData}>  {/* Call clearAllData to delete all data */}
+                onPress={clearAllData}>  
                 <Text style={styles.buttonText}>Delete Data</Text>
               </TouchableOpacity>
 
@@ -296,6 +325,19 @@ const styles = StyleSheet.create({
     color: black,
     fontFamily: "Helvetica",
   },
+  currencyContainer: {
+    alignItems: 'flex-start', // Align content to the left side
+    marginTop: -30,
+    marginRight: 140, // Add some margin at the top for spacing
+    paddingLeft: 10, // Optional: Add padding if needed to move text slightly from the left edge
+  },
+  
+  currencyText: {
+    fontSize: 12, // Small text size
+    color: '#000000',
+    textAlign: 'left', // Ensure text alignment is to the left
+    fontWeight: 'bold',
+  },
   buttonContainer: {
     color: "black",
     marginTop: 50,
@@ -336,7 +378,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 6,
     backgroundColor: "blue",
-  }
+  },
 });
 
 export default LandingScreen;
