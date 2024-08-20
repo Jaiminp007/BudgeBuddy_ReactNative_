@@ -49,6 +49,7 @@ const LandingScreen = () => {
       await AsyncStorage.clear();
       console.log('All data cleared successfully');
       Alert.alert("All data cleared successfully!");
+      setValue('');
     } catch (e) {
       console.log('Failed to clear data', e);
     }

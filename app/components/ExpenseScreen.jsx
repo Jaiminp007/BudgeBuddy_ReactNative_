@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 
 const lightGreen = '#7ae582';
@@ -10,29 +11,71 @@ const white = '#ffffff';
 const yellow = "#ffb703";
 const blue = "#264653";
 
-const ExpenseScreen = ({ cashAmount }) => {
+const ExpenseScreen = () => {
   const [expense, setExpense] = useState('');
   const [date, setDate] = useState('');
   const [note, setNote] = useState('');
-  
+  const [cashAmount, setCashAmount] = useState(0);
+
   const router = useRouter();
 
-  const handleAddExpense = () => {
-    const newAmount = cashAmount - parseFloat(expense);  // Subtract expense from cashAmount
-    console.log("Remaining Amount:", newAmount);  // Log the remaining amount
+  useEffect(() => {
+    const getCashAmount = async () => {
+      try {
+        const storedCashAmount = await AsyncStorage.getItem('cashAmount');
+        if (storedCashAmount !== null) {
+          setCashAmount(parseFloat(storedCashAmount));
+        }
+      } catch (error) {
+        console.error('Failed to fetch cash amount from AsyncStorage:', error);
+      }
+    };
 
+    getCashAmount();
+  }, []);
+
+  const handleAddExpense = async () => {
     if (!expense || parseFloat(expense) === 0) {
       Alert.alert("Invalid Input", "Please enter a valid expense amount greater than zero.");
       return;
     }
-    setExpense('');
-    setDate('');
-    setNote('');
-    // Navigate back to MainPage and pass the new cashAmount
-    router.push({
-      pathname: '/MainPage',
-      params: { cashAmount: newAmount.toString() },
-    });
+
+    try {
+      // Retrieve the latest cash amount from AsyncStorage
+      const storedCashAmount = await AsyncStorage.getItem('cashAmount');
+      const currentCashAmount = storedCashAmount !== null ? parseFloat(storedCashAmount) : 0;
+  
+      // Subtract the expense from the current cash amount
+      const newAmount = currentCashAmount - parseFloat(expense);
+  
+      // Update the new cash amount in AsyncStorage
+      await AsyncStorage.setItem('cashAmount', newAmount.toString());
+  
+      console.log("Remaining Amount:", newAmount);  // Log the remaining amount
+
+      const storedExpenses = await AsyncStorage.getItem('expenses');
+      const expenses = storedExpenses ? JSON.parse(storedExpenses) : {};
+
+    // Add the new expense, date, and note to the expenses dictionary
+      expenses[expense] = [date, note];
+
+    // Save the updated expenses back to AsyncStorage
+      await AsyncStorage.setItem('expenses', JSON.stringify(expenses));
+
+      console.log("Updated Expenses:", expenses);  // Log the updated expenses
+
+      setExpense('');
+      setDate('');
+      setNote('');
+  
+      // Navigate back to MainPage and pass the new cashAmount
+      router.push({
+        pathname: '/MainPage',
+        params: { cashAmount: newAmount.toString() },
+      });
+    } catch (error) {
+      console.error('Failed to update cash amount in AsyncStorage:', error);
+    }
   };
 
   const dismissKeyboard = () => {
@@ -88,7 +131,7 @@ const ExpenseScreen = ({ cashAmount }) => {
       </View>
     </TouchableWithoutFeedback>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

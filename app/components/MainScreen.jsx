@@ -26,7 +26,6 @@ import rupeeIcon from "../../assets/RupeeIcon.png";
 import dollarIcon from "../../assets/DollarIcon.png";
 import euroIcon from "../../assets/EuroIcon.png";
 import poundIcon from "../../assets/PoundIcon.png";
-import logo from "../../assets/Logo.png";
 
 const MainScreen = ({ cashAmount }) => {
   const router = useRouter();
@@ -39,6 +38,8 @@ const MainScreen = ({ cashAmount }) => {
   const [loading, setLoading] = useState(true);
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [topExpenses, setTopExpenses] = useState([]);
+
 
   const retrieveData = async () => {
     try {
@@ -48,7 +49,8 @@ const MainScreen = ({ cashAmount }) => {
         'password',
         'userId',
         'cashAmount',
-        'selectedCurrencyIcon'
+        'selectedCurrencyIcon',
+        'expenses',
       ]);
 
       const savedName = values[0][1];
@@ -57,6 +59,7 @@ const MainScreen = ({ cashAmount }) => {
       const savedUserId = values[3][1];
       const savedCashAmount = values[4][1];
       const savedCurrencyIcon = values[5][1];
+      const storedExpenses = values[6][1]; 
 
       console.log('--- Retrieved Data ---');
       console.log('Name:', savedName);
@@ -64,7 +67,19 @@ const MainScreen = ({ cashAmount }) => {
       console.log('Password:', savedPassword);
       console.log('User ID:', savedUserId);
       console.log('Cash Amount:', savedCashAmount);
-      console.log('Retrieved Currency Icon:', savedCurrencyIcon);  // Log retrieved value
+      console.log('Retrieved Currency Icon:', savedCurrencyIcon);
+        // Log retrieved value
+
+      let expenses = {};
+      if (storedExpenses) {
+        expenses = JSON.parse(storedExpenses);
+      }
+      console.log('Expenses Dictionary:', expenses);  // Log the expenses
+
+      const sortedExpenses = Object.entries(expenses)
+      .sort((a, b) => parseFloat(b[0]) - parseFloat(a[0]))  // Sort by expense amount in descending order
+      .slice(0, 3);  // Get the top 3 expenses
+      setTopExpenses(sortedExpenses);  // Set the top expenses in state
 
       // Update state only if values are not null or undefined
       if (savedName) setName(savedName);
@@ -129,16 +144,31 @@ const MainScreen = ({ cashAmount }) => {
           <Text style={styles.boxTextHeading}>Cash Amount</Text>
           <View style={styles.cashAmountContainer}>
             {currencyIcon ? (
-              <Image source={currencyIcon} style={styles.currencyIcon} />
+              <Image source={currencyIcon} style={styles.currencyIconCash} />
             ) : (
               <Text style={styles.fallbackText}>No Icon</Text> // Fallback if no icon is found
             )}
-            <Text style={styles.boxTextPara}>{String(currentCashAmount)}</Text>
+            <Text style={styles.boxTextParaCash}>{String(currentCashAmount)}</Text>
           </View>
         </View>
 
         <View style={styles.box}>
           <Text style={styles.boxTextHeading}>Top Expenses</Text>
+          {topExpenses.length > 0 ? (
+            topExpenses.map(([expense], index) => (
+            <View style={styles.expenseBoxContainer}>
+              <Text style={styles.expenseNumber}>{`${index + 1}) `}</Text>
+              {currencyIcon ? (
+                <Image source={currencyIcon} style={styles.currencyIcon} />
+              ) : (
+                <Text style={styles.fallbackText}>No Icon</Text>
+              )}
+              <Text style={styles.expenseText}>{expense}</Text>
+            </View>
+            ))
+          ) : (
+            <Text style={styles.expenseText}>No expenses yet</Text>
+          )}
         </View>
       </View>
 
@@ -262,23 +292,52 @@ const styles = StyleSheet.create({
     flexDirection: 'row', // Align icon and cash amount horizontally
     alignItems: 'center', // Center align the items vertically
   },
-  currencyIcon: {
-    width: 22, // Adjust the size of the currency icon
-    height: 22,
-    marginRight: 2,
+  expenseBoxContainer: {
+    flexDirection: 'row',
+    alignItems: "center",
+    marginTop: 4,
+  },
+  currencyIconCash: {
+    width: 23, // Adjust the size of the currency icon
+    height: 23,
+    marginRight: 5,
     tintColor: white,
-    marginBottom: 2,
+    marginTop: 2,
+  },
+  currencyIcon: {
+    width: 20, // Adjust the size of the currency icon
+    height: 20,
+    marginRight: 5,
+    tintColor: white,
+    marginTop: 2,
   },
   boxTextHeading: {
     fontSize: 17,
     textAlign: "left",
     color: yellow,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 8,
     fontFamily: "Helvetica",
   },
+  expenseText: {
+    fontSize: 20,
+    color: white,
+    textAlign: "left",
+    fontFamily: "Helvetica",
+  },
+  expenseNumber: {
+    color: white,
+    fontSize: 20,
+    fontFamily: "Helvetica"
+  },
   boxTextPara: {
-    fontSize: 23,
+    fontSize: 20,
+    color: white,
+    textAlign: "left",
+    fontFamily: "Helvetica",
+  },
+  boxTextParaCash: {
+    fontSize: 25,
     color: white,
     textAlign: "left",
     fontFamily: "Helvetica",
