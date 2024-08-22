@@ -13,4 +13,4 @@
 
 3. let implement Unique Key per User method and change the data storage solution, we will even add logic to create the key and that will be add start from user_id:1 or add 1 to that last user_id
 
-# start url http://localhost:8081/?id=1
+# start url http://localhost:8081?id=1
