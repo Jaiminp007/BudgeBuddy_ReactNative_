@@ -16,8 +16,8 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 import rupeeIcon from "../../assets/RupeeIcon.png"; // Adjust the path based on your folder structure
 import dollarIcon from "../../assets/DollarIcon.png"; // Adjust the path based on your folder structure
@@ -25,175 +25,142 @@ import euroIcon from "../../assets/EuroIcon.png"; // Adjust the path based on yo
 import poundIcon from "../../assets/PoundIcon.png"; // Adjust the path based on your folder structure
 import logo from "../../assets/Logo.png"; // Adjust the path based on your folder structure
 
-const lightGreen = "#7ae582";
-const darkGreen = "#40916c";
-const black = "#040303";
-const white = "#ffffff";
-const blue = "#264653";
-const yellow = "#ffb703";
-const background ="#dddddd";
+const background = "#dddddd";
 
 const LandingScreen = () => {
-  const [name, setName] = useState('Jaimin');
-  const [username, setUsername] = useState('Jaimin007');
-  const [password, setPassword] = useState('Patel');
-  const [userId, setUserId] = useState('609');
+  const navigation = useNavigation();
+  const route = useRoute();
+  const userId = route.params?.id;
+  const [userData, setUserData] = useState({
+    name: "",
+    cashAmount: "",
+    selectedCurrencyIcon: rupeeIcon, // Default to rupeeIcon
+  });
   const [loading, setLoading] = useState(true);
-  const [value, setValue] = useState("");
-  const [currencyIcon, setCurrencyIcon] = useState(rupeeIcon); // Default currency icon
-  const router = useRouter();
 
-  // Function to clear all data
+  useEffect(() => {
+    initializeData();
+  }, []);
+
+  const initializeData = async () => {
+    const existingData = await AsyncStorage.getItem("userDetails");
+    if (!existingData) {
+      const initialData = {
+        userDetails: {
+          1: {
+            name: "Jaimin",
+            cashAmount: 0,
+            selectedCurrencyIcon: "",
+            expense: [
+              { expenseId: 1, expenseAmount: 0 },
+              { expenseId: 2, expenseAmount: 0 },
+            ],
+          },
+        },
+      };
+      await AsyncStorage.setItem("userDetails", JSON.stringify(initialData));
+      console.log("Initial data set in AsyncStorage");
+    }
+    console.log(existingData);
+    retrieveData();
+  };
+
+  const retrieveData = async () => {
+    const jsonString = await AsyncStorage.getItem("userDetails");
+    if (jsonString) {
+      const userDetails = JSON.parse(jsonString).userDetails[userId];
+      if (userDetails) {
+        setUserData({
+          name: userDetails.name,
+          cashAmount: userDetails.cashAmount.toString(),
+          selectedCurrencyIcon: userDetails.selectedCurrencyIcon || rupeeIcon, // Default icon if undefined
+        });
+      }
+    }
+    setLoading(false);
+  };
+
+  const storeData = async () => {
+    const jsonString = await AsyncStorage.getItem("userDetails");
+    const allUserDetails = JSON.parse(jsonString);
+    allUserDetails.userDetails[userId] = {
+      ...userData,
+      cashAmount: parseInt(userData.cashAmount),
+    };
+    await AsyncStorage.setItem("userDetails", JSON.stringify(allUserDetails));
+    console.log("Data successfully stored for user:", userId);
+  };
+
+  const handleCashAmountChange = (text) => {
+    setUserData({ ...userData, cashAmount: text });
+  };
+
+  const handleCurrencySelection = (icon) => {
+    setUserData({ ...userData, selectedCurrencyIcon: icon });
+  };
+
   const clearAllData = async () => {
     try {
       await AsyncStorage.clear();
-      console.log('All data cleared successfully');
+      console.log("All data cleared successfully");
       Alert.alert("All data cleared successfully!");
-      setValue('');
+      setUserData({
+        ...userData,
+        cashAmount: "",
+        selectedCurrencyIcon: rupeeIcon,
+      }); // Reset to default values
     } catch (e) {
-      console.log('Failed to clear data', e);
+      console.error("Failed to clear the AsyncStorage:", e);
+      Alert.alert("Error clearing data.");
     }
   };
-  
-  const retrieveData = async () => {
-    try {
-      const values = await AsyncStorage.multiGet([
-        'name',
-        'username',
-        'password',
-        'userId',
-        'cashAmount',
-        'selectedCurrencyIcon'
-      ]);
-  
-      const savedName = values[0][1];
-      const savedUsername = values[1][1];
-      const savedPassword = values[2][1];
-      const savedUserId = values[3][1];
-      const savedCashAmount = values[4][1];
-      const savedCurrencyIcon = values[5][1];
-  
-      console.log('--- Retrieved Data ---');
-      console.log('Name:', savedName);
-      console.log('Username:', savedUsername);
-      console.log('Password:', savedPassword);
-      console.log('User ID:', savedUserId);
-      console.log('Cash Amount:', savedCashAmount);
-      console.log('Selected Currency Icon:', savedCurrencyIcon);
-  
-      // Update state only if values are not null or undefined
-      if (savedName) setName(savedName);
-      if (savedUsername) setUsername(savedUsername);
-      if (savedPassword) setPassword(savedPassword);
-      if (savedUserId) setUserId(savedUserId);
-      if (savedCashAmount) setValue(savedCashAmount);
-  
-      // Ensure the currency icon is set to a valid image, default to rupeeIcon if not
-      if (savedCurrencyIcon) {
-        switch (savedCurrencyIcon) {
-          case "../../assets/RupeeIcon.png":
-            setCurrencyIcon(rupeeIcon);
-            break;
-          case "../../assets/DollarIcon.png":
-            setCurrencyIcon(dollarIcon);
-            break;
-          case "../../assets/EuroIcon.png":
-            setCurrencyIcon(euroIcon);
-            break;
-          case "../../assets/PoundIcon.png":
-            setCurrencyIcon(poundIcon);
-            break;
-          default:
-            setCurrencyIcon(rupeeIcon); // Default fallback to rupeeIcon
-            break;
-        }
-      } else {
-        setCurrencyIcon(rupeeIcon); // Default to rupeeIcon if no value is found
-      }
-  
-    }  catch (e) {
-      console.log('Failed to retrieve the data from the storage:', e);
-    } finally {
-      setLoading(false); // Set loading to false after retrieval
-    }
-  };
-  
-  useEffect(() => {
-    retrieveData(); // Automatically retrieve data when the component mounts
-  }, []);
-  
-  
 
   const handleNavigation = async () => {
-    if (value) {  // Ensure value is not empty
-      console.log("Navigating with cashAmount:", value);
+    if (userData.cashAmount) {
+      // Ensure value is not empty
+      console.log("Navigating with cashAmount:", userData.cashAmount);
       try {
-        let iconPath;
-        if (currencyIcon === rupeeIcon) {
-          iconPath = "../../assets/RupeeIcon.png";
-        } else if (currencyIcon === dollarIcon) {
-          iconPath = "../../assets/DollarIcon.png";
-        } else if (currencyIcon === euroIcon) {
-          iconPath = "../../assets/EuroIcon.png";
-        } else if (currencyIcon === poundIcon) {
-          iconPath = "../../assets/PoundIcon.png";
+        let iconName;
+        switch (userData.selectedCurrencyIcon) {
+          case rupeeIcon:
+            iconName = "RupeeIcon.png";
+            break;
+          case dollarIcon:
+            iconName = "DollarIcon.png";
+            break;
+          case euroIcon:
+            iconName = "EuroIcon.png";
+            break;
+          case poundIcon:
+            iconName = "PoundIcon.png";
+            break;
+          default:
+            iconName = "RupeeIcon.png"; // Default icon name or handle error
         }
 
-        await AsyncStorage.multiSet([
-          ['name', name],
-          ['username', username],
-          ['password', password],
-          ['userId', userId],
-          ['cashAmount', value],
-          ['selectedCurrencyIcon', iconPath]
-        ]);
-        console.log('Data successfully stored');
+        // Prepare and update the user data in AsyncStorage
+        const jsonString = await AsyncStorage.getItem("userDetails");
+        const allUserDetails = JSON.parse(jsonString);
+        allUserDetails.userDetails[userId] = {
+          ...userData,
+          cashAmount: parseInt(userData.cashAmount),
+          selectedCurrencyIcon: iconName, // Storing the icon name instead of path
+        };
+        await AsyncStorage.setItem(
+          "userDetails",
+          JSON.stringify(allUserDetails)
+        );
+        console.log("Data successfully stored with icon name:", iconName);
+
+        // Navigation
+        navigation.navigate("MainPage", { userId: userId });
       } catch (e) {
-        console.log('Failed to save the data to the storage');
+        console.log("Failed to save the data to the storage:", e);
+        Alert.alert("Error saving data. Please try again.");
       }
-      router.push({
-        pathname: "/LandingPage",  // Ensure this route is correct
-        params: { cashAmount: value }  // Correct way to pass params
-      }); // Pass cashAmount to MainPage.jsx
     } else {
       Alert.alert("Please enter a valid cash amount");
     }
-  };
-
-  const handleInputChange = (input) => {
-    if (/^\d*$/.test(input)) {
-      setValue(input);
-    }
-  };
-
-  const dismissKeyboard = () => {
-    Keyboard.dismiss();
-  };
-
-  const selectCurrency = () => {
-    Alert.alert(
-      "Select Currency",
-      "Choose a currency",
-      [
-        {
-          text: "₹ Rupees",
-          onPress: () => setCurrencyIcon(rupeeIcon),
-        },
-        {
-          text: "$ Dollar",
-          onPress: () => setCurrencyIcon(dollarIcon),
-        },
-        {
-          text: "€ Euro",
-          onPress: () => setCurrencyIcon(euroIcon),
-        },
-        {
-          text: "£ Pound",
-          onPress: () => setCurrencyIcon(poundIcon),
-        },
-      ],
-      { cancelable: true }
-    );
   };
 
   if (loading) {
@@ -210,54 +177,45 @@ const LandingScreen = () => {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <ScrollView contentContainerStyle={styles.container}>
-          <TouchableWithoutFeedback onPress={dismissKeyboard}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.innerContainer}>
               <Image style={styles.logo} source={logo} />
               <Text style={styles.textOne}>
-                Ever wonder where all your cash goes? BudgeBuddy makes it easy
-                to keep track of your physical cash so you can budget better and
-                spend wisely.
+                Welcome, {userData.name}! Ready to manage your finances?
               </Text>
-              <Text style={styles.textTwo}>
-                Enter Your Current Cash Amount to Get Started!
-              </Text>
-              <View style={styles.inputContainer}>
-                <TouchableOpacity onPress={selectCurrency}>
-                  <Image source={currencyIcon} style={styles.currencyIcon} />
-                </TouchableOpacity>
-                <TextInput
-                  style={styles.input}
-                  value={value}
-                  onChangeText={handleInputChange}
-                  keyboardType="numeric"
-                  placeholder="Type a number"
-                />
-              </View>
-
+              <TextInput
+                style={styles.input}
+                value={userData.cashAmount}
+                onChangeText={handleCashAmountChange}
+                keyboardType="numeric"
+                placeholder="Enter Cash Amount"
+              />
               <View style={styles.currencyContainer}>
-                <Text style={styles.currencyText}>
-                  ↑ Press here to access multiple currencies
-                </Text>
+                <TouchableOpacity
+                  onPress={() => handleCurrencySelection(rupeeIcon)}>
+                  <Image source={rupeeIcon} style={styles.currencyIcon} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleCurrencySelection(dollarIcon)}>
+                  <Image source={dollarIcon} style={styles.currencyIcon} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleCurrencySelection(euroIcon)}>
+                  <Image source={euroIcon} style={styles.currencyIcon} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleCurrencySelection(poundIcon)}>
+                  <Image source={poundIcon} style={styles.currencyIcon} />
+                </TouchableOpacity>
               </View>
-
-              <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.button}
                 onPress={handleNavigation}>
                 <Text style={styles.buttonText}>Begin your Journey</Text>
               </TouchableOpacity>
-              </View>
-              <TouchableOpacity
-                style={styles.printButton}
-                onPress={retrieveData}>  
-                <Text style={styles.buttonText}>View Stored Data</Text>
+              <TouchableOpacity style={styles.button} onPress={clearAllData}>
+                <Text style={styles.buttonText}>Clear Data</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.delbutton}
-                onPress={clearAllData}>  
-                <Text style={styles.buttonText}>Delete Data</Text>
-              </TouchableOpacity>
-
             </View>
           </TouchableWithoutFeedback>
         </ScrollView>
@@ -266,8 +224,12 @@ const LandingScreen = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   container: {
     backgroundColor: background,
     flexGrow: 1,
@@ -286,7 +248,7 @@ const styles = StyleSheet.create({
   },
   textOne: {
     fontSize: 18,
-    color: darkGreen,
+    color: "#40916c",
     textAlign: "center",
     paddingLeft: 20,
     paddingRight: 20,
@@ -295,7 +257,7 @@ const styles = StyleSheet.create({
   },
   textTwo: {
     fontSize: 20,
-    color: blue,
+    color: "#264653",
     fontWeight: "bold",
     textAlign: "center",
     paddingLeft: 20,
@@ -313,7 +275,6 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     marginRight: 10,
-    marginLeft: -20,
   },
   input: {
     flex: 1,
@@ -323,35 +284,20 @@ const styles = StyleSheet.create({
     padding: 8,
     fontSize: 18,
     borderRadius: 4,
-    color: black,
+    color: "#040303",
     fontFamily: "Helvetica",
   },
   currencyContainer: {
-    alignItems: 'flex-start', // Align content to the left side
-    marginTop: -30,
-    marginRight: 140, // Add some margin at the top for spacing
-    paddingLeft: 10, // Optional: Add padding if needed to move text slightly from the left edge
-  },
-  
-  currencyText: {
-    fontSize: 12, // Small text size
-    color: '#000000',
-    textAlign: 'left', // Ensure text alignment is to the left
-    fontWeight: 'bold',
-  },
-  buttonContainer: {
-    color: "black",
-    marginTop: 50,
-    width: "50%",
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 6,
-    backgroundColor: "#40916c",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    marginTop: 20,
+    marginBottom: 20,
   },
   button: {
-    width: "100%",
-    height: "100%",
+    marginTop: 20,
+    width: "50%",
+    height: 60,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 6,
@@ -361,24 +307,6 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  delbutton:{
-    marginTop: 20,
-    width: "20%",
-    height: "10%",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 6,
-    backgroundColor: "red",
-  },
-  printButton: {
-    marginTop: 10,
-    width: "20%",
-    height: "10%",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 6,
-    backgroundColor: "blue",
   },
 });
 
