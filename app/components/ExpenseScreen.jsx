@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert } from 'react-native';
 
 const lightGreen = '#7ae582';
 const darkGreen = '#40916c';
@@ -12,69 +11,110 @@ const yellow = "#ffb703";
 const blue = "#264653";
 
 const ExpenseScreen = () => {
-  const [expense, setExpense] = useState('');
   const [date, setDate] = useState('');
   const [note, setNote] = useState('');
+  const [amount, setAmount] = useState('');
   const [cashAmount, setCashAmount] = useState(0);
 
-  const router = useRouter();
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const route = useRoute();
+  const navigation = useNavigation();
+  const { userId } = route.params;
+  console.log("User ID",userId)
+  const inspectStorage = async () => {
+    try {
+      const jsonString = await AsyncStorage.getItem("userDetails");
+      if (jsonString) {
+        const allData = JSON.parse(jsonString);
+        console.log("Complete userDetails stored in AsyncStorage:", allData);
+      } else {
+        console.log("No data found in AsyncStorage.");
+      }
+    } catch (error) {
+      console.error("Error inspecting AsyncStorage:", error);
+    }
+  };
+
+  const retrieveData = async () => {
+    setLoading(true);
+    try {
+      const jsonString = await AsyncStorage.getItem("userDetails");
+      console.log("Retrieved jsonString:", jsonString); // Check what is being retrieved from AsyncStorage
+      if (jsonString) {
+        const allData = JSON.parse(jsonString);
+        console.log("Parsed allData:", allData); // Log the parsed JSON to check structure
+        const userDetails = allData.userDetails[userId]; // Adjusted to reflect the correct path to userDetails
+        console.log("userDetails object:", userDetails);
+         // Further log to confirm the structure
+        if (userDetails) {
+          setUserData(userDetails);
+          console.log(userData)
+          setCashAmount(userDetails.cashAmount || 0); // Set cashAmount with a default of 0 if undefined
+        } else {
+          console.log("User data not found for ID:", userId);
+        }
+      } else {
+        console.log("No user data found in AsyncStorage.");
+      }
+      }
+   catch (e) {
+      console.error("Failed to fetch data from storage:", e);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const getCashAmount = async () => {
-      try {
-        const storedCashAmount = await AsyncStorage.getItem('cashAmount');
-        if (storedCashAmount !== null) {
-          setCashAmount(parseFloat(storedCashAmount));
-        }
-      } catch (error) {
-        console.error('Failed to fetch cash amount from AsyncStorage:', error);
-      }
-    };
-
-    getCashAmount();
-  }, []);
+    inspectStorage();
+    if (userId) {
+      retrieveData();
+    } else {
+      console.log("No userId found in route parameters");
+      setLoading(false);
+    }
+  }, [userId]);
 
   const handleAddExpense = async () => {
-    if (!expense || parseFloat(expense) === 0) {
-      Alert.alert("Invalid Input", "Please enter a valid expense amount greater than zero.");
+    console.log("Button clicked");
+    if (!amount || parseFloat(amount) === 0) {
+      console.log("Invalid Input", "Please enter a valid expense amount greater than zero.");
+      return;
+    }
+    if (!userData) {
+      console.log("Data Error", "User data not loaded correctly.");
       return;
     }
 
     try {
-      // Retrieve the latest cash amount from AsyncStorage
-      const storedCashAmount = await AsyncStorage.getItem('cashAmount');
-      const currentCashAmount = storedCashAmount !== null ? parseFloat(storedCashAmount) : 0;
-  
-      // Subtract the expense from the current cash amount
-      const newAmount = currentCashAmount - parseFloat(expense);
-  
-      // Update the new cash amount in AsyncStorage
-      await AsyncStorage.setItem('cashAmount', newAmount.toString());
-  
-      console.log("Remaining Amount:", newAmount);  // Log the remaining amount
+      const currentCashAmount = cashAmount || 0;
 
-      const storedExpenses = await AsyncStorage.getItem('expenses');
-      const expenses = storedExpenses ? JSON.parse(storedExpenses) : {};
+      const newAmount = currentCashAmount - parseFloat(amount);
+      setCashAmount(newAmount);
 
-    // Add the new expense, date, and note to the expenses dictionary
-      expenses[expense] = [date, note];
+      const newExpense = {
+        expenseId: 1,
+        expenseAmount: parseFloat(amount),
+        date,
+        note,
+      };
 
-    // Save the updated expenses back to AsyncStorage
-      await AsyncStorage.setItem('expenses', JSON.stringify(expenses));
+      const updatedUserData = {
+        ...userData,
+        cashAmount: newAmount,
+        expense: [newExpense],
+      };
 
-      console.log("Updated Expenses:", expenses);  // Log the updated expenses
+      const allUserDetails = JSON.parse(await AsyncStorage.getItem("userDetails")) || {};
+      allUserDetails[userId] = updatedUserData;
 
-      setExpense('');
-      setDate('');
-      setNote('');
-  
-      // Navigate back to MainPage and pass the new cashAmount
-      router.push({
-        pathname: '/MainPage',
-        params: { cashAmount: newAmount.toString() },
-      });
+      await AsyncStorage.setItem("userDetails", JSON.stringify(allUserDetails));
+
+      console.log("Expense successfully added for user:", userId);
+
+      navigation.navigate("MainPage", { userId: userId });
     } catch (error) {
-      console.error('Failed to update cash amount in AsyncStorage:', error);
+      console.error('Failed in subtraction:', error);
     }
   };
 
@@ -89,10 +129,10 @@ const ExpenseScreen = () => {
         <View style={styles.formContainer}>
           <TextInput
             style={styles.input}
-            value={expense}
+            value={amount}
             onChangeText={(text) => {
-              if (/^\d*\.?\d*$/.test(text)) {  // Allow decimal numbers
-                setExpense(text);
+              if (/^\d*\.?\d*$/.test(text)) {
+                setAmount(text);
               }
             }}
             keyboardType="numeric"
@@ -100,7 +140,7 @@ const ExpenseScreen = () => {
             placeholderTextColor="#aaa"
           />
         </View>
-     
+
         <View style={styles.formContainer}>
           <TextInput
             style={styles.dateInput}

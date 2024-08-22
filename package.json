@@ -12,6 +12,7 @@
     "@expo/vector-icons": "^14.0.0",
     "@lottiefiles/react-lottie-player": "^3.5.4",
     "@react-native-async-storage/async-storage": "^1.24.0",
+    "@react-native-community/art": "^1.2.0",
     "@react-native-picker/picker": "^2.7.7",
     "@react-navigation/drawer": "^6.7.2",
     "@react-navigation/native": "^6.1.18",

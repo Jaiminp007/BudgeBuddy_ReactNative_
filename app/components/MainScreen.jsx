@@ -8,19 +8,12 @@ import {
   ActivityIndicator,
   Dimensions,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import menuIcon from "../../assets/MenuIcon.png"; 
+import { useNavigation, useRoute } from "@react-navigation/native";
+import menuIcon from "../../assets/MenuIcon.png";
 import addIcon from "../../assets/AddIcon.png";
 import { DrawerActions } from "@react-navigation/native";
-import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LineChart } from 'react-native-chart-kit'; // Import LineChart
-
-// Import images
-import rupeeIcon from "../../assets/RupeeIcon.png";
-import dollarIcon from "../../assets/DollarIcon.png";
-import euroIcon from "../../assets/EuroIcon.png";
-import poundIcon from "../../assets/PoundIcon.png";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LineChart } from "react-native-chart-kit";
 
 const lightGreen = "#7ae582";
 const darkGreen = "#40916c";
@@ -29,146 +22,123 @@ const white = "#ffffff";
 const blue = "#264653";
 const yellow = "#ffb703";
 
-const MainScreen = ({ cashAmount }) => {
+const MainScreen = ({ cashAmount}) => {
+  /*
   const router = useRouter();
   const navigation = useNavigation();
 
   const [currentCashAmount, setCurrentCashAmount] = useState(cashAmount);
   const [currencyIcon, setCurrencyIcon] = useState(null);
-  const [name, setName] = useState('');
-  const [userId, setUserId] = useState('');
+  const [name, setName] = useState("");
+  const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(true);
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [topExpenses, setTopExpenses] = useState([]);
+  */
 
-  import React, { useState, useEffect } from 'react';
-  import { View, Text, ActivityIndicator, Button, AsyncStorage } from 'react-native';
-  import { useNavigation, useRouter } from '@react-navigation/native';
-  import { DrawerActions } from '@react-navigation/drawer';
-  
-  const MainScreen = ({ cashAmount }) => {
-    const router = useRouter();
-    const navigation = useNavigation();
-  
-    const [currentCashAmount, setCurrentCashAmount] = useState(cashAmount);
-    const [currencyIcon, setCurrencyIcon] = useState(null);
-    const [name, setName] = useState('');
-    const [userId, setUserId] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [password, setPassword] = useState('');
-    const [username, setUsername] = useState('');
-    const [cashAmounts, setCashAmounts] = useState([1000, 9000, 7000]); // Initial cash amounts
-    const [expenses, setExpenses] = useState([]);
-  
-    const retrieveData = async () => {
-      try {
-        const values = await AsyncStorage.multiGet([
-          'name',
-          'username',
-          'password',
-          'userId',
-          'cashAmount',
-          'selectedCurrencyIcon',
-          'expenses',
-        ]);
-  
-        const savedName = values[0][1];
-        const savedUsername = values[1][1];
-        const savedPassword = values[2][1];
-        const savedUserId = values[3][1];
-        const savedCashAmount = values[4][1];
-        const savedCurrencyIcon = values[5][1];
-        const storedExpenses = values[6][1]; 
-  
-        console.log('--- Retrieved Data ---');
-        console.log('Name:', savedName);
-        console.log('Username:', savedUsername);
-        console.log('Password:', savedPassword);
-        console.log('User ID:', savedUserId);
-        console.log('Cash Amount:', savedCashAmount);
-        console.log('Selected Currency Icon:', savedCurrencyIcon);
-  
-        let expensesData = [];
-        if (storedExpenses) {
-          expensesData = JSON.parse(storedExpenses);
-        }
-        
-        setExpenses(expensesData);
-        
-        // Calculate updated cash amounts based on expenses
-        const updatedCashAmounts = calculateUpdatedCashAmounts(cashAmounts, expensesData);
-        setCashAmounts(updatedCashAmounts);
-  
-        if (savedName) setName(savedName);
-        if (savedUsername) setUsername(savedUsername);
-        if (savedPassword) setPassword(savedPassword);
-        if (savedUserId) setUserId(savedUserId);
-        if (savedCashAmount) setCurrentCashAmount(savedCashAmount);
-  
-        if (savedCurrencyIcon === '../../assets/RupeeIcon.png') {
-          setCurrencyIcon(rupeeIcon);
-        } else if (savedCurrencyIcon === '../../assets/DollarIcon.png') {
-          setCurrencyIcon(dollarIcon);
-        } else if (savedCurrencyIcon === '../../assets/EuroIcon.png') {
-          setCurrencyIcon(euroIcon);
-        } else if (savedCurrencyIcon === '../../assets/PoundIcon.png') {
-          setCurrencyIcon(poundIcon);
+  const navigation = useNavigation();
+  const route = useRoute();
+  const {userId} = route.params; // Retrieve userId from navigation params
+  console.log("User ID retrieved from route params:", userId);
+
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const screenWidth = Dimensions.get("window").width;
+
+  const chartConfig = {
+    backgroundGradientFrom: "#264653",
+    backgroundGradientFromOpacity: 0,
+    backgroundGradientTo: "#2a9d8f",
+    backgroundGradientToOpacity: 0.9,
+    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    strokeWidth: 2,
+    barPercentage: 0.5,
+    useShadowColorFromDataset: false,
+    propsForDots: {
+      r: "6", // Radius of the point
+      strokeWidth: "2", // Width of the point border
+      stroke: "#ffffff", // Color of the point border
+    },
+    propsForLabels: {
+      // Properties for labels
+      fontFamily: "Helvetica",
+      fontSize: "12",
+      fontWeight: "bold",
+      fill: "#ffffff", // Ensures labels are white
+    },
+  };
+
+  // Calculate the chart dimensions
+  const chartWidth = screenWidth - 70; // 20px padding on each side
+  const chartHeight = 370; // Fixed height, adjust as necessary
+
+  // handleMenuPress function defined here
+  const handleMenuPress = () => {
+    navigation.dispatch(DrawerActions.openDrawer());
+  };
+
+  const handleNavigation = async () => {
+    navigation.navigate("ExpensePage", {userId: userId});
+  }
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const jsonString = await AsyncStorage.getItem("userDetails");
+      console.log("Retrieved jsonString:", jsonString); // Check what is being retrieved from AsyncStorage
+      if (jsonString) {
+        const allData = JSON.parse(jsonString);
+        console.log("Parsed allData:", allData); // Log the parsed JSON to check structure
+        const userDetails = allData.userDetails; // Adjusted to reflect the correct path to userDetails
+        console.log("userDetails object:", userDetails); // Further log to confirm the structure
+        if (userDetails && userDetails[userId]) {
+          console.log("User Data for ID:", userDetails[userId]); // Ensure the correct user data is fetched
+          setUserData(userDetails[userId]);
+          const cashAmount = userDetails[userId][cashAmount]
+          // const Expenses = userDetails[userId][]
         } else {
-          setCurrencyIcon(null);
+          console.log("User data not found for ID:", userId);
         }
-      } catch (e) {
-        console.log('Failed to retrieve the data from the storage:', e);
-      } finally {
-        setLoading(false);
       }
-    };
-  
-    useEffect(() => {
-      if (cashAmount !== undefined) {
-        setCurrentCashAmount(cashAmount); 
-        retrieveData();
-      }
-    }, [cashAmount]);
-  
-    // Function to calculate updated cash amounts
-    const calculateUpdatedCashAmounts = (amounts, expenses) => {
-      let updatedAmounts = [...amounts];
-      expenses.forEach(expense => {
-        // Example logic to subtract expense from the last amount
-        // Customize the logic based on your requirements
-        if (updatedAmounts.length > 0) {
-          updatedAmounts[updatedAmounts.length - 1] -= expense;
-        }
-      });
-      return updatedAmounts;
-    };
-  
-    const handleMenuPress = () => {
-      navigation.dispatch(DrawerActions.openDrawer()); 
-    };
-  
-    const addExpense = (amount) => {
-      // Add expense and update cash amounts
-      setExpenses([...expenses, amount]);
-      const updatedCashAmounts = calculateUpdatedCashAmounts(cashAmounts, [...expenses, amount]);
-      setCashAmounts(updatedCashAmounts);
-    };
-  
-    if (loading) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#40916c" />
-        </View>
-      );
+    } catch (e) {
+      console.error("Failed to fetch data from storage:", e);
     }
-      
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (userId) {
+      fetchData();
+    } else {
+      console.log("No userId found in route parameters");
+      setLoading(false);
+    }
+  }, [userId]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#40916c" />
+      </View>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <View style={styles.container}>
+        <Text>No user data found.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTextContainer}>
-          <Text style={styles.headerText}>Hello {String(name)}</Text>
-          <Text style={styles.idText}>ID: {String(userId)}</Text>
+          <Text style={styles.headerText}>Hello {userData.name}</Text>
+          <Text style={styles.idText}>ID: {userId}</Text>
         </View>
         <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
           <Image source={menuIcon} style={styles.menuIcon} />
@@ -179,83 +149,64 @@ const MainScreen = ({ cashAmount }) => {
         <View style={styles.box}>
           <Text style={styles.boxTextHeading}>Cash Amount</Text>
           <View style={styles.cashAmountContainer}>
-            {currencyIcon ? (
+            {/* {currencyIcon ? ( 
               <Image source={currencyIcon} style={styles.currencyIconCash} />
             ) : (
               <Text style={styles.fallbackText}>No Icon</Text> 
-            )}
-            <Text style={styles.boxTextParaCash}>{String(currentCashAmount)}</Text>
+            )}*/}
+            <Text style={styles.boxTextParaCash}>
+              {cashAmount}
+            </Text>
           </View>
         </View>
 
         <View style={styles.box}>
           <Text style={styles.boxTextHeading}>Top Expenses</Text>
-          {topExpenses.length > 0 ? (
-            topExpenses.map(([expense, data], index) => (
-            <View key={expense} style={styles.expenseBoxContainer}>
-              <Text style={styles.expenseNumber}>{`${index + 1}) `}</Text>
-              {currencyIcon ? (
-                <Image source={currencyIcon} style={styles.currencyIcon} />
-              ) : (
-                <Text style={styles.fallbackText}>No Icon</Text>
-              )}
-              <Text style={styles.expenseText}>{expense}</Text>
-            </View>
+          {/* {topExpenses.length > 0 ? (
+            topExpenses.map(([expense], index) => (
+              <View style={styles.expenseBoxContainer}>
+                <Text style={styles.expenseNumber}>{`${index + 1}) `}</Text>
+                {/* {currencyIcon ? (
+                  <Image source={currencyIcon} style={styles.currencyIcon} />
+                ) : (
+                  <Text style={styles.fallbackText}>No Icon</Text>
+                )}
+                <Text style={styles.expenseText}>{expense}</Text>
+              </View>
             ))
           ) : (
             <Text style={styles.expenseText}>No Expense</Text>
-          )}
+          )}*/}
         </View>
       </View>
 
       <View style={styles.bigBox}>
-  <Text style={styles.bigBoxText}>Graph</Text>
-  <LineChart
-    data={{
-      labels: Array.from({ length: topExpenses.length + 1 }, (_, i) => `${i}`), // X-axis labels (0, 1, 2, ...)
-      datasets: [
-        {
-          // Start with the original cash amount and subtract each expense one by one
-          data: topExpenses.reduce((acc, [expense]) => {
-            const lastAmount = acc[acc.length - 1]; // Get the last amount in the array
-            const newAmount = lastAmount - parseFloat(expense); // Subtract the expense from the last amount
-            return [...acc, newAmount]; // Add the new amount to the array
-          }, [parseFloat(cashAmount)]), // Use the original cashAmount here, not currentCashAmount
-        },
-      ],
-    }}
-    width={Dimensions.get("window").width - 60} // Width of the chart
-    height={Dimensions.get("window").width - 70} // Height of the chart to make it square
-    yAxisLabel="" // Optional: Add currency symbol if desired
-    chartConfig={{
-      backgroundColor: "#e26a00",
-      backgroundGradientFrom: "#fb8c00",
-      backgroundGradientTo: "#ffa726",
-      decimalPlaces: 2,
-      color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-      labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-      style: {
-        borderRadius: 16,
-      },
-      propsForDots: {
-        r: "6",
-        strokeWidth: "2",
-        stroke: "#ffa726",
-      },
-    }}
-    style={{
-      marginVertical: 8,
-      borderRadius: 16,
-    }}
-  />
-</View>
+        <Text style={styles.bigBoxText}>Graph</Text>
+        {/* <LineChart
+          data={{
+            labels: expenseLabels,
+            datasets: [
+              {
+                data: { currentCashAmount },
+              },
+            ],
+          }}
+          width={chartWidth}
+          height={chartHeight}
+          yAxisLabel="₹"
+          chartConfig={chartConfig}
+          bezier
+          style={{
+            marginVertical: 8,
+            borderRadius: 16,
+            alignSelf: "center", // Center align in the bigBox
+          }}
+        /> */}
+      </View>
 
       <View style={styles.wideBox}>
         <TouchableOpacity
-          onPress={() => router.push({
-            pathname: '/ExpensePage',
-            params: { cashAmount: currentCashAmount },
-          })}>
+          onPress={handleNavigation}>
           <View style={styles.circle}>
             <Image source={addIcon} style={styles.addIcon} />
           </View>
@@ -296,8 +247,8 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   fallbackText: {
-    color: 'red', // Adjust the fallback text style as needed
-  },  
+    color: "red", // Adjust the fallback text style as needed
+  },
   menuButton: {
     padding: 10,
     marginBottom: 8,
@@ -363,11 +314,11 @@ const styles = StyleSheet.create({
     height: 25,
   },
   cashAmountContainer: {
-    flexDirection: 'row', // Align icon and cash amount horizontally
-    alignItems: 'center', // Center align the items vertically
+    flexDirection: "row", // Align icon and cash amount horizontally
+    alignItems: "center", // Center align the items vertically
   },
   expenseBoxContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     alignItems: "center",
     marginTop: 4,
   },
@@ -402,7 +353,7 @@ const styles = StyleSheet.create({
   expenseNumber: {
     color: white,
     fontSize: 20,
-    fontFamily: "System"
+    fontFamily: "Helvetica",
   },
   boxTextPara: {
     fontSize: 20,

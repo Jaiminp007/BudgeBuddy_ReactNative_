@@ -2,7 +2,8 @@ import React from 'react';
 import MainUI from './components/MainScreen';
 import { useLocalSearchParams } from 'expo-router';
 
-const MainPage = () => {
+
+const MainPage = ({}) => {
   const params = useLocalSearchParams();  // Retrieve parameters
   const cashAmount = params.cashAmount ? parseFloat(params.cashAmount) : 0;  // Safely handle cashAmount
 

@@ -69,14 +69,8 @@ const LoginScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>ZApp</Text>
+        <Text style={styles.loadingText}>BudgetBuddy</Text>
         <ActivityIndicator size="large" color="#007bff" />
-        {/* <LottieView
-          source={require("../../assets/Animation.json")}
-          autoPlay
-          loop
-          style={{ width: 150, height: 150 }}
-        /> */}
       </View>
     );
   }
