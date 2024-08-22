@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingLeft: 20,
     paddingRight: 20,
-    fontFamily: "Helvetica",
+    fontFamily: "System",
     marginBottom: 50,
   },
   textTwo: {
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingLeft: 20,
     paddingRight: 20,
-    fontFamily: "Helvetica",
+    fontFamily: "System",
     marginBottom: 20,
   },
   inputContainer: {
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     borderRadius: 4,
     color: black,
-    fontFamily: "Helvetica",
+    fontFamily: "System",
   },
   currencyContainer: {
     alignItems: 'flex-start', // Align content to the left side
