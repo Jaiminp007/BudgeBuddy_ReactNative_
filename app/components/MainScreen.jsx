@@ -46,35 +46,42 @@ const MainScreen = ({ }) => {
   const [loading, setLoading] = useState(true);
   const [cashAmount, setCashAmount] = useState(0);
   const [topExpenses, setTopExpenses] = useState([]);
+  const [cashHistory, setCashHistory] = useState([]);
   
   const screenWidth = Dimensions.get("window").width;
 
+  const expenseLabels = cashHistory.map((_, index) => (index + 1).toString());
+
   const chartConfig = {
-    backgroundGradientFrom: "#264653",
+    backgroundGradientFrom: "#50C878",
     backgroundGradientFromOpacity: 0,
-    backgroundGradientTo: "#2a9d8f",
+    backgroundGradientTo: "#008080",
     backgroundGradientToOpacity: 0.9,
     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
     strokeWidth: 2,
     barPercentage: 0.5,
     useShadowColorFromDataset: false,
+    paddingLeft: 80, // Add padding to the left to create more space
+  paddingRight: 20,
     propsForDots: {
       r: "6", // Radius of the point
       strokeWidth: "2", // Width of the point border
-      stroke: "#ffffff", // Color of the point border
+      stroke: "#ffffff",
+     // Color of the point border
     },
     propsForLabels: {
       // Properties for labels
       fontFamily: "Helvetica",
       fontSize: "12",
       fontWeight: "bold",
-      fill: "#ffffff", // Ensures labels are white
+      fill: "#ffffff",
+      padding: 40, // Ensures labels are white
     },
   };
 
   // Calculate the chart dimensions
-  const chartWidth = screenWidth - 70; // 20px padding on each side
-  const chartHeight = 370; // Fixed height, adjust as necessary
+  const chartWidth = screenWidth - 60; // 20px padding on each side
+  const chartHeight = 300; // Fixed height, adjust as necessary
 
   // handleMenuPress function defined here
   const handleMenuPress = () => {
@@ -102,6 +109,11 @@ const MainScreen = ({ }) => {
           console.log(expenseList);
           setTopExpenses(expenseList);
           }
+          if (userData["cashHistory"]){
+            const cashHistory = userData["cashHistory"]
+            console.log(cashHistory)
+            setCashHistory(cashHistory)
+          }
           const cashAmount = userData["cashAmount"]; // Retrieve cashAmount directly from userData
           console.log("Cash Amount:", cashAmount);
           setCashAmount(cashAmount); // Set the cashAmount state
@@ -118,7 +130,8 @@ const MainScreen = ({ }) => {
     const focusListener = navigation.addListener('focus', () => {
       fetchData(); // Fetch data when the screen is focused
     });
-  
+
+    
     // Clean up the listener when the component unmounts
     return () => {
       focusListener.remove();
@@ -188,26 +201,31 @@ const MainScreen = ({ }) => {
       </View>
       <View style={styles.bigBox}>
         <Text style={styles.bigBoxText}>Graph</Text>
-        {/* <LineChart
-          data={{
-            labels: expenseLabels,
-            datasets: [
-              {
-                data: { currentCashAmount },
-              },
-            ],
-          }}
-          width={chartWidth}
-          height={chartHeight}
-          yAxisLabel="₹"
-          chartConfig={chartConfig}
-          bezier
-          style={{
-            marginVertical: 8,
-            borderRadius: 16,
-            alignSelf: "center", // Center align in the bigBox
-          }}
-        /> */}
+        {cashHistory.length > 0 ? (
+<LineChart
+  data={{
+    labels: expenseLabels, // Labels for the x-axis (1, 2, 3, 4, ...)
+    datasets: [
+      {
+        data: cashHistory, // Your cashHistory array containing the cash amounts
+      },
+    ],
+  }}
+  width={chartWidth} // from Dimensions
+  height={chartHeight} // Specify the height of the chart
+  yAxisLabel="₹" // Label for y-axis, assuming currency is INR
+  chartConfig={chartConfig} // Your chart configuration
+  bezier // Optional: Adds a bezier curve to the line chart
+  style={{
+    marginVertical: -10,
+    marginHorizontal: 80,
+    borderRadius: 16,
+    alignSelf: "center",
+  }}
+/>) : (
+        <Text  style={styles.noDataText}>No data available to display</Text>
+      )};
+
       </View>
 
       <View style={styles.wideBox}>

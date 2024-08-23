@@ -96,12 +96,15 @@ const ExpenseScreen = () => {
           .map(expense => expense.expenseAmount)
           .sort((a, b) => b - a);
 
+          const updatedCashHistory = userData.cashHistory ? [...userData.cashHistory, updatedCashAmount] : [userData.cashAmount, updatedCashAmount];
+
         // Update the user's data in the userDetails object
         userDetails[userId] = {
           ...userData,
           cashAmount: updatedCashAmount,
           expense: updatedExpenseList,
-          Topexpenses: TopExpenses, // Store the sorted TopExpenses list
+          Topexpenses: TopExpenses,
+          cashHistory: updatedCashHistory, // Store the sorted TopExpenses list
         };
 
         // Save the updated userDetails back to AsyncStorage

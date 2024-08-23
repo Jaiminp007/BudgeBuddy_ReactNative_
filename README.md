@@ -16,9 +16,4 @@
 # start url http://localhost:8081?id=1
 
 
-#Logic is written for expense part just have to make an exception that the user cannot enter the expense amount to be zero. as in Asynstorage it is defining it as null which destroys the app.
-<<<<<<< HEAD
-#Have to write logic for graph and top expenses.
-=======
-#Have to write logic for graph and top expenses.
->>>>>>> 6950e8c856e03a9490e58044af4ce19453635901
+#GRAPH AND TOP XPENSE DONE,WORK TO DO:- make the UI of graph better,make the UI of landingscreen better,add options user can pick currency in LandingScreen, make the login page, add currency symbols infront of cashAmount and expense in main screen.
