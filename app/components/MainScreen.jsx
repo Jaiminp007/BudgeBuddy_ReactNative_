@@ -45,6 +45,7 @@ const MainScreen = ({ }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cashAmount, setCashAmount] = useState(0);
+  const [topExpenses, setTopExpenses] = useState([]);
   
   const screenWidth = Dimensions.get("window").width;
 
@@ -96,7 +97,11 @@ const MainScreen = ({ }) => {
         if (allData && allData["userDetails"] && allData["userDetails"][userId]) {
           const userData = allData["userDetails"][userId];
           setUserData(userData); // Set the userData state
-  
+          if (userData["Topexpenses"]){
+          const expenseList = userData["Topexpenses"];
+          console.log(expenseList);
+          setTopExpenses(expenseList);
+          }
           const cashAmount = userData["cashAmount"]; // Retrieve cashAmount directly from userData
           console.log("Cash Amount:", cashAmount);
           setCashAmount(cashAmount); // Set the cashAmount state
@@ -165,24 +170,22 @@ const MainScreen = ({ }) => {
 
         <View style={styles.box}>
           <Text style={styles.boxTextHeading}>Top Expenses</Text>
-          {/* {topExpenses.length > 0 ? (
-            topExpenses.map(([expense], index) => (
-              <View style={styles.expenseBoxContainer}>
-                <Text style={styles.expenseNumber}>{`${index + 1}) `}</Text>
-                {/* {currencyIcon ? (
-                  <Image source={currencyIcon} style={styles.currencyIcon} />
-                ) : (
-                  <Text style={styles.fallbackText}>No Icon</Text>
-                )}
-                <Text style={styles.expenseText}>{expense}</Text>
-              </View>
-            ))
-          ) : (
-            <Text style={styles.expenseText}>No Expense</Text>
-          )}*/}
-        </View>
-      </View>
 
+  {topExpenses.length > 0 ? (
+    <Text style={styles.boxTextPara}>{topExpenses[0]}</Text>
+  ) : (
+    <Text style={styles.boxTextPara}>No Expenses</Text>
+  )}
+
+  {topExpenses.length > 1 && (
+    <Text style={styles.boxTextPara}>{topExpenses[1]}</Text>
+  )}
+
+  {topExpenses.length > 2 && (
+    <Text style={styles.boxTextPara}>{topExpenses[2]}</Text>
+  )}
+      </View>
+      </View>
       <View style={styles.bigBox}>
         <Text style={styles.bigBoxText}>Graph</Text>
         {/* <LineChart

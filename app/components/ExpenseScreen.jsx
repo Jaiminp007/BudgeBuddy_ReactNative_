@@ -48,7 +48,7 @@ const ExpenseScreen = () => {
         console.log("userDetails object:", userDetails); // Further log to confirm the structure
         if (userDetails) {
           setUserData(userDetails);
-          setCashAmount(userDetails.cashAmount); // Set cashAmount with a default of 0 if undefined
+          setCashAmount(userDetails.cashAmount);
         } else {
           console.log("User data not found for ID:", userId);
         }
@@ -91,19 +91,27 @@ const ExpenseScreen = () => {
         // Append the new expense to the expense list or create a new list if it doesn't exist
         const updatedExpenseList = userData.expense ? [...userData.expense, newExpense] : [newExpense];
 
+        // Step 1: Extract expense amounts and sort them in decreasing order
+        const TopExpenses = updatedExpenseList
+          .map(expense => expense.expenseAmount)
+          .sort((a, b) => b - a);
+
         // Update the user's data in the userDetails object
         userDetails[userId] = {
           ...userData,
           cashAmount: updatedCashAmount,
           expense: updatedExpenseList,
+          Topexpenses: TopExpenses, // Store the sorted TopExpenses list
         };
 
         // Save the updated userDetails back to AsyncStorage
         storageData.userDetails = userDetails;
         await AsyncStorage.setItem('userDetails', JSON.stringify(storageData));
+        
         setAmount('');  
         setDate('');    
         setNote('');
+        
         // Navigate back to the main page
         navigation.navigate('MainPage', { userId });
       } else {
