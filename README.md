@@ -17,3 +17,4 @@
 
 
 #Logic is written for expense part just have to make an exception that the user cannot enter the expense amount to be zero. as in Asynstorage it is defining it as null which destroys the app.
+#Have to write logic for graph and top expenses.
