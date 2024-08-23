@@ -14,3 +14,6 @@
 3. let implement Unique Key per User method and change the data storage solution, we will even add logic to create the key and that will be add start from user_id:1 or add 1 to that last user_id
 
 # start url http://localhost:8081?id=1
+
+
+#Logic is written for expense part just have to make an exception that the user cannot enter the expense amount to be zero. as in Asynstorage it is defining it as null which destroys the app.

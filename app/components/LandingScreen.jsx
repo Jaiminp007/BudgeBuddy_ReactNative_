@@ -34,8 +34,8 @@ const LandingScreen = () => {
   const [userData, setUserData] = useState({
     name: "",
     cashAmount: "",
-    selectedCurrencyIcon: rupeeIcon, // Default to rupeeIcon
-  });
+    selectedCurrencyIcon: rupeeIcon,
+    });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,10 +51,7 @@ const LandingScreen = () => {
             name: "Jaimin",
             cashAmount: 0,
             selectedCurrencyIcon: "",
-            expense: [
-              { expenseId: 1, expenseAmount: 0 },
-              { expenseId: 2, expenseAmount: 0 },
-            ],
+           
           },
         },
       };
@@ -74,7 +71,7 @@ const LandingScreen = () => {
         setUserData({
           name: userDetails.name,
           cashAmount: userDetails.cashAmount.toString(),
-          selectedCurrencyIcon: userDetails.selectedCurrencyIcon || rupeeIcon, // Default icon if undefined
+          selectedCurrencyIcon: userDetails.selectedCurrencyIcon || rupeeIcon,
         });
       }
     }

@@ -22,7 +22,7 @@ const ExpenseScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { userId } = route.params;
-  console.log("User ID",userId)
+
   const inspectStorage = async () => {
     try {
       const jsonString = await AsyncStorage.getItem("userDetails");
@@ -38,7 +38,6 @@ const ExpenseScreen = () => {
   };
 
   const retrieveData = async () => {
-    setLoading(true);
     try {
       const jsonString = await AsyncStorage.getItem("userDetails");
       console.log("Retrieved jsonString:", jsonString); // Check what is being retrieved from AsyncStorage
@@ -46,77 +45,80 @@ const ExpenseScreen = () => {
         const allData = JSON.parse(jsonString);
         console.log("Parsed allData:", allData); // Log the parsed JSON to check structure
         const userDetails = allData.userDetails[userId]; // Adjusted to reflect the correct path to userDetails
-        console.log("userDetails object:", userDetails);
-         // Further log to confirm the structure
+        console.log("userDetails object:", userDetails); // Further log to confirm the structure
         if (userDetails) {
           setUserData(userDetails);
-          console.log(userData)
-          setCashAmount(userDetails.cashAmount || 0); // Set cashAmount with a default of 0 if undefined
+          setCashAmount(userDetails.cashAmount); // Set cashAmount with a default of 0 if undefined
         } else {
           console.log("User data not found for ID:", userId);
         }
       } else {
         console.log("No user data found in AsyncStorage.");
       }
-      }
-   catch (e) {
+    } catch (e) {
       console.error("Failed to fetch data from storage:", e);
     }
-    setLoading(false);
   };
-
-  useEffect(() => {
-    inspectStorage();
-    if (userId) {
-      retrieveData();
-    } else {
-      console.log("No userId found in route parameters");
-      setLoading(false);
-    }
-  }, [userId]);
 
   const handleAddExpense = async () => {
-    console.log("Button clicked");
-    if (!amount || parseFloat(amount) === 0) {
-      console.log("Invalid Input", "Please enter a valid expense amount greater than zero.");
-      return;
-    }
-    if (!userData) {
-      console.log("Data Error", "User data not loaded correctly.");
-      return;
-    }
-
     try {
-      const currentCashAmount = cashAmount || 0;
+      // Retrieve the entire object from AsyncStorage
+      const jsonString = await AsyncStorage.getItem('userDetails');
+      const storageData = jsonString ? JSON.parse(jsonString) : {};
 
-      const newAmount = currentCashAmount - parseFloat(amount);
-      setCashAmount(newAmount);
+      // Access the `userDetails` object within the storageData
+      const userDetails = storageData.userDetails || {};
 
-      const newExpense = {
-        expenseId: 1,
-        expenseAmount: parseFloat(amount),
-        date,
-        note,
-      };
+      // Check if the user exists in the userDetails
+      if (userDetails[userId]) {
+        // Get the user's existing data
+        const userData = userDetails[userId];
+        
+        // Convert the amount to a number
+        const expenseAmount = parseFloat(amount);
 
-      const updatedUserData = {
-        ...userData,
-        cashAmount: newAmount,
-        expense: [newExpense],
-      };
+        // Subtract the expense amount from the cash amount
+        const updatedCashAmount = userData.cashAmount - expenseAmount;
 
-      const allUserDetails = JSON.parse(await AsyncStorage.getItem("userDetails")) || {};
-      allUserDetails[userId] = updatedUserData;
+        // Create a new expense object
+        const newExpense = {
+          expenseId: userData.expense ? userData.expense.length + 1 : 1, // Increment expense ID or start from 1 if no expenses
+          expenseAmount: expenseAmount,
+          date: date,
+          note: note,
+        };
 
-      await AsyncStorage.setItem("userDetails", JSON.stringify(allUserDetails));
+        // Append the new expense to the expense list or create a new list if it doesn't exist
+        const updatedExpenseList = userData.expense ? [...userData.expense, newExpense] : [newExpense];
 
-      console.log("Expense successfully added for user:", userId);
+        // Update the user's data in the userDetails object
+        userDetails[userId] = {
+          ...userData,
+          cashAmount: updatedCashAmount,
+          expense: updatedExpenseList,
+        };
 
-      navigation.navigate("MainPage", { userId: userId });
+        // Save the updated userDetails back to AsyncStorage
+        storageData.userDetails = userDetails;
+        await AsyncStorage.setItem('userDetails', JSON.stringify(storageData));
+        setAmount('');  
+        setDate('');    
+        setNote('');
+        // Navigate back to the main page
+        navigation.navigate('MainPage', { userId });
+      } else {
+        console.error('User not found');
+      }
+    
     } catch (error) {
-      console.error('Failed in subtraction:', error);
+      console.error('Error adding expense:', error);
     }
   };
+  
+  useEffect(() => {
+    retrieveData();
+    inspectStorage();
+  }, []);
 
   const dismissKeyboard = () => {
     Keyboard.dismiss();
@@ -165,13 +167,17 @@ const ExpenseScreen = () => {
           />
         </View>
 
-        <TouchableOpacity style={styles.buttonContainer} onPress={handleAddExpense}>
+        <TouchableOpacity
+          style={styles.buttonContainer}
+          onPress={() => handleAddExpense(userId, amount, date, note, navigation)}
+        >
           <Text style={styles.buttonText}>Add Expense</Text>
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

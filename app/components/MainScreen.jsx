@@ -22,7 +22,7 @@ const white = "#ffffff";
 const blue = "#264653";
 const yellow = "#ffb703";
 
-const MainScreen = ({ cashAmount}) => {
+const MainScreen = ({ }) => {
   /*
   const router = useRouter();
   const navigation = useNavigation();
@@ -44,7 +44,8 @@ const MainScreen = ({ cashAmount}) => {
 
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [cashAmount, setCashAmount] = useState(0);
+  
   const screenWidth = Dimensions.get("window").width;
 
   const chartConfig = {
@@ -82,41 +83,43 @@ const MainScreen = ({ cashAmount}) => {
   const handleNavigation = async () => {
     navigation.navigate("ExpensePage", {userId: userId});
   }
-
   const fetchData = async () => {
-    setLoading(true);
     try {
+      setLoading(true); // Start loading before fetching data
+  
       const jsonString = await AsyncStorage.getItem("userDetails");
       console.log("Retrieved jsonString:", jsonString); // Check what is being retrieved from AsyncStorage
+      
       if (jsonString) {
         const allData = JSON.parse(jsonString);
-        console.log("Parsed allData:", allData); // Log the parsed JSON to check structure
-        const userDetails = allData.userDetails; // Adjusted to reflect the correct path to userDetails
-        console.log("userDetails object:", userDetails); // Further log to confirm the structure
-        if (userDetails && userDetails[userId]) {
-          console.log("User Data for ID:", userDetails[userId]); // Ensure the correct user data is fetched
-          setUserData(userDetails[userId]);
-          const cashAmount = userDetails[userId][cashAmount]
-          // const Expenses = userDetails[userId][]
-        } else {
-          console.log("User data not found for ID:", userId);
+  
+        if (allData && allData["userDetails"] && allData["userDetails"][userId]) {
+          const userData = allData["userDetails"][userId];
+          setUserData(userData); // Set the userData state
+  
+          const cashAmount = userData["cashAmount"]; // Retrieve cashAmount directly from userData
+          console.log("Cash Amount:", cashAmount);
+          setCashAmount(cashAmount); // Set the cashAmount state
         }
       }
     } catch (e) {
       console.error("Failed to fetch data from storage:", e);
+    } finally {
+      setLoading(false); // Stop loading after data retrieval
     }
-    setLoading(false);
   };
-
+  
   useEffect(() => {
-    if (userId) {
-      fetchData();
-    } else {
-      console.log("No userId found in route parameters");
-      setLoading(false);
-    }
-  }, [userId]);
-
+    const focusListener = navigation.addListener('focus', () => {
+      fetchData(); // Fetch data when the screen is focused
+    });
+  
+    // Clean up the listener when the component unmounts
+    return () => {
+      focusListener.remove();
+    };
+  }, [navigation, userId]);
+  
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
