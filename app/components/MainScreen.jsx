@@ -49,6 +49,7 @@ const MainScreen = ({ }) => {
   const [cashHistory, setCashHistory] = useState([]);
   
   const screenWidth = Dimensions.get("window").width;
+  const screenHeight = Dimensions.get("window").height;
 
   const expenseLabels = cashHistory.map((_, index) => (index + 1).toString());
 
@@ -81,7 +82,7 @@ const MainScreen = ({ }) => {
 
   // Calculate the chart dimensions
   const chartWidth = screenWidth - 60; // 20px padding on each side
-  const chartHeight = 300; // Fixed height, adjust as necessary
+  const chartHeight = screenHeight -550; // Fixed height, adjust as necessary
 
   // handleMenuPress function defined here
   const handleMenuPress = () => {
@@ -164,7 +165,7 @@ const MainScreen = ({ }) => {
           <Image source={menuIcon} style={styles.menuIcon} />
         </TouchableOpacity>
       </View>
-
+  
       <View style={styles.row}>
         <View style={styles.box}>
           <Text style={styles.boxTextHeading}>Cash Amount</Text>
@@ -179,57 +180,57 @@ const MainScreen = ({ }) => {
             </Text>
           </View>
         </View>
-
+  
         <View style={styles.box}>
           <Text style={styles.boxTextHeading}>Top Expenses</Text>
-
-  {topExpenses.length > 0 ? (
-    <Text style={styles.boxTextPara}>{topExpenses[0]}</Text>
-  ) : (
-    <Text style={styles.boxTextPara}>No Expenses</Text>
-  )}
-
-  {topExpenses.length > 1 && (
-    <Text style={styles.boxTextPara}>{topExpenses[1]}</Text>
-  )}
-
-  {topExpenses.length > 2 && (
-    <Text style={styles.boxTextPara}>{topExpenses[2]}</Text>
-  )}
+  
+          {topExpenses.length > 0 ? (
+            <Text style={styles.boxTextPara}>{topExpenses[0]}</Text>
+          ) : (
+            <Text style={styles.boxTextPara}>No Expenses</Text>
+          )}
+  
+          {topExpenses.length > 1 && (
+            <Text style={styles.boxTextPara}>{topExpenses[1]}</Text>
+          )}
+  
+          {topExpenses.length > 2 && (
+            <Text style={styles.boxTextPara}>{topExpenses[2]}</Text>
+          )}
+        </View>
       </View>
-      </View>
+  
       <View style={styles.bigBox}>
         <Text style={styles.bigBoxText}>Graph</Text>
         {cashHistory.length > 0 ? (
-<LineChart
-  data={{
-    labels: expenseLabels, // Labels for the x-axis (1, 2, 3, 4, ...)
-    datasets: [
-      {
-        data: cashHistory, // Your cashHistory array containing the cash amounts
-      },
-    ],
-  }}
-  width={chartWidth} // from Dimensions
-  height={chartHeight} // Specify the height of the chart
-  yAxisLabel="₹" // Label for y-axis, assuming currency is INR
-  chartConfig={chartConfig} // Your chart configuration
-  bezier // Optional: Adds a bezier curve to the line chart
-  style={{
-    marginVertical: -10,
-    marginHorizontal: 80,
-    borderRadius: 16,
-    alignSelf: "center",
-  }}
-/>) : (
-        <Text  style={styles.noDataText}>No data available to display</Text>
-      )};
-
+          <LineChart
+            data={{
+              labels: expenseLabels, // Labels for the x-axis (1, 2, 3, 4, ...)
+              datasets: [
+                {
+                  data: cashHistory, // Your cashHistory array containing the cash amounts
+                },
+              ],
+            }}
+            width={chartWidth} // from Dimensions
+            height={chartHeight} // Specify the height of the chart
+            yAxisLabel="₹" // Label for y-axis, assuming currency is INR
+            chartConfig={chartConfig} // Your chart configuration
+            bezier // Optional: Adds a bezier curve to the line chart
+            style={{
+              marginVertical: -10,
+              marginHorizontal: 80,
+              borderRadius: 16,
+              alignSelf: "center",
+            }}
+          />
+        ) : (
+          <Text style={styles.noDataText}>No data available to display</Text>
+        )}
       </View>
-
+  
       <View style={styles.wideBox}>
-        <TouchableOpacity
-          onPress={handleNavigation}>
+        <TouchableOpacity onPress={handleNavigation}>
           <View style={styles.circle}>
             <Image source={addIcon} style={styles.addIcon} />
           </View>
@@ -237,7 +238,7 @@ const MainScreen = ({ }) => {
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

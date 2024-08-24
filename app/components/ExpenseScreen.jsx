@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 const lightGreen = '#7ae582';
 const darkGreen = '#40916c';
 const black = '#040303';
@@ -58,6 +57,10 @@ const ExpenseScreen = () => {
     } catch (e) {
       console.error("Failed to fetch data from storage:", e);
     }
+  };
+
+  const handleMenuPress = () => {
+    navigation.dispatch(DrawerActions.openDrawer());
   };
 
   const handleAddExpense = async () => {
@@ -139,6 +142,7 @@ const ExpenseScreen = () => {
     <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <View style={styles.container}>
         <Text style={styles.title}>Add a New Expense</Text>
+        
         <View style={styles.formContainer}>
           <TextInput
             style={styles.input}
@@ -203,6 +207,14 @@ const styles = StyleSheet.create({
     marginTop: 25,
     marginBottom: 30,
     color: blue, 
+  },
+  menuButton: {
+    padding: 10,
+    marginBottom: 8,
+  },
+  menuIcon: {
+    width: 30,
+    height: 30,
   },
   input: {
     width: '90%',

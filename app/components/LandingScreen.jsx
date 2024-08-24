@@ -142,12 +142,15 @@ const LandingScreen = () => {
         if (!allUserDetails.userDetails) {
           allUserDetails.userDetails = {}; // Initialize userDetails if it doesn't exist
         }
-
+        const cashAmount = userData.cashAmount
         allUserDetails.userDetails[userId] = {
           ...userData,
-          cashAmount: parseInt(userData.cashAmount),
+          cashAmount: parseInt(cashAmount),
           name: username,
-          selectedCurrencyIcon: iconName, // Storing the icon name instead of path
+          selectedCurrencyIcon: iconName,
+          expense: [],
+          Topexpenses: [],
+          cashHistory: [parseInt(cashAmount)],
         
         };
         await AsyncStorage.setItem(

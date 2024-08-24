@@ -81,13 +81,6 @@ export default function Layout() {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
       <Drawer.Screen
-        name="login"
-        options={{
-          title: "Login",
-          headerLeft: () => <CustomHeaderLeft />,
-        }}
-      />
-      <Drawer.Screen
         name="MainPage"
         options={{
           title: null, // Remove the "MainPage" title

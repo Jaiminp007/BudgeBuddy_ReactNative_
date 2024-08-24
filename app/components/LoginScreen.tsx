@@ -79,7 +79,7 @@ const LoginScreen = () => {
   const handleNavigation = async () => {
     const userId = Math.floor(100 + Math.random() * 900);
     console.log(userId)
-    
+    setUsername('')
     navigation.navigate("LoginPage", {userId,username});
   }
 

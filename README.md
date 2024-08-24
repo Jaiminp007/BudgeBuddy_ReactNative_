@@ -16,4 +16,4 @@
 # start url http://localhost:8081?id=1
 
 
-#GRAPH AND TOP XPENSE DONE,WORK TO DO:- make the UI of graph better,make the UI of landingscreen better,add options user can pick currency in LandingScreen, make the login page, add currency symbols infront of cashAmount and expense in main screen.
+WORK TO DO:- add currency symbols infront of cashAmount and expense in main screen, add users in login page.
