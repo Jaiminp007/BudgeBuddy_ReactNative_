@@ -128,14 +128,13 @@ const MainScreen = ({ }) => {
   
   useEffect(() => {
     const focusListener = navigation.addListener('focus', () => {
-      fetchData(); // Fetch data when the screen is focused
-    });
+      console.log("Screen is focused");
+      fetchData();
+      });
 
     
     // Clean up the listener when the component unmounts
-    return () => {
-      focusListener.remove();
-    };
+
   }, [navigation, userId]);
   
   if (loading) {

@@ -30,7 +30,8 @@ const background = "#dddddd";
 const LandingScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const userId = route.params?.id;
+  const { userId, username } = route.params;
+  console.log(username)
   const [userData, setUserData] = useState({
     name: "",
     cashAmount: "",
@@ -44,32 +45,29 @@ const LandingScreen = () => {
 
   const initializeData = async () => {
     const existingData = await AsyncStorage.getItem("userDetails");
-    if (!existingData) {
-      const initialData = {
-        userDetails: {
-          1: {
-            name: "Jaimin",
-            cashAmount: 0,
-            selectedCurrencyIcon: "",
-           
-          },
-        },
-      };
-
-      await AsyncStorage.setItem("userDetails", JSON.stringify(initialData));
-      console.log("Initial data set in AsyncStorage");
+  
+    if (existingData) {
+      console.log("Data Exist")
+      const data = JSON.parse(existingData);
+      console.log(data)
+      
+  
+      // Save the updated data back to AsyncStorage
+      await AsyncStorage.setItem("userDetails", JSON.stringify(data));
+      console.log("Username updated in AsyncStorage for user 119");
+    
     }
-    console.log(existingData);
-    retrieveData();
+    retrieveData();  // Retrieve data to update the UI
   };
+  
 
   const retrieveData = async () => {
     const jsonString = await AsyncStorage.getItem("userDetails");
+    console.log(jsonString)
     if (jsonString) {
       const userDetails = JSON.parse(jsonString).userDetails[userId];
       if (userDetails) {
         setUserData({
-          name: userDetails.name,
           cashAmount: userDetails.cashAmount.toString(),
           selectedCurrencyIcon: userDetails.selectedCurrencyIcon || rupeeIcon,
         });
@@ -84,6 +82,7 @@ const LandingScreen = () => {
     allUserDetails.userDetails[userId] = {
       ...userData,
       cashAmount: parseInt(userData.cashAmount),
+      name: username,
     };
     await AsyncStorage.setItem("userDetails", JSON.stringify(allUserDetails));
     console.log("Data successfully stored for user:", userId);
@@ -147,6 +146,7 @@ const LandingScreen = () => {
         allUserDetails.userDetails[userId] = {
           ...userData,
           cashAmount: parseInt(userData.cashAmount),
+          name: username,
           selectedCurrencyIcon: iconName, // Storing the icon name instead of path
         
         };
@@ -155,7 +155,7 @@ const LandingScreen = () => {
           JSON.stringify(allUserDetails)
         );
         console.log("Data successfully stored with icon name:", iconName);
-        console.log(userId)
+        console.log("Hi",userId)
         // Navigation
         navigation.navigate("MainPage", { userId: userId });
       } catch (e) {
@@ -185,7 +185,7 @@ const LandingScreen = () => {
             <View style={styles.innerContainer}>
               <Image style={styles.logo} source={logo} />
               <Text style={styles.textOne}>
-                Welcome, {userData.name}! Ready to manage your finances?
+                Welcome, {username}! Ready to manage your finances?
               </Text>
               <TextInput
                 style={styles.input}

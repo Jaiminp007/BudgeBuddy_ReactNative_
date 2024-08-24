@@ -1,8 +1,8 @@
 import React from "react";
 
-import LoginScreen from "./components/LoginScreen";
+import LandingScreen from "./components/LandingScreen";
 
 export default function Login() {
   // return <DashboardScreen />;
-  return <LoginScreen />;
+  return <LandingScreen />;
 }

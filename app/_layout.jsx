@@ -27,16 +27,8 @@ const CustomDrawerContent = (props) => {
 
   const handleLogout = async () => {
     // Clear the auth token and credentials from memory and AsyncStorage
-    authService.logout();
+    props.navigation.navigate("index");
 
-    // Navigate to the login screen
-    props.navigation.navigate("login");
-
-    // Reload the app
-    props.navigation.reset({
-      index: 0,
-      routes: [{ name: "login" }],
-    });
   };
 
   return (
@@ -65,7 +57,9 @@ const CustomDrawerContent = (props) => {
             <Ionicons name="log-out-outline" color={color} size={size} />
           )}
           label="Logout"
-          onPress={handleLogout}
+          onPress={
+            handleLogout
+          }
         />
       </DrawerContentScrollView>
     </View>
@@ -120,6 +114,13 @@ export default function Layout() {
         options={{
           title: "Feedback",
           headerLeft: () => <CustomHeaderLeft />,
+        }}
+      />
+      <Drawer.Screen
+        name="LoginPage"
+        options={{
+          title: null, // Remove the "MainPage" title
+          headerShown: false, // Remove the entire header including the menu icon
         }}
       />
     </Drawer>
