@@ -17,7 +17,7 @@ import {
 import { useRouter } from "expo-router";
 import { CheckBox } from "react-native-elements";
 import { authService } from "../services/apiHost";
-import { useNavigation } from "@react-navigation/native"; 
+import { useNavigation, useFocusEffect } from "@react-navigation/native"; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = () => {
@@ -40,40 +40,52 @@ const LoginScreen = () => {
 
   const clearAllData = async () => {
     try {
-      await AsyncStorage.clear();
+      // Clear all user details from AsyncStorage
+      await AsyncStorage.removeItem('userDetails');
       console.log("All data cleared successfully");
+  
+      // Update the state to remove all user boxes from the UI
+      setUserData({});
+  
+      // Notify the user of the successful deletion
       Alert.alert("All data cleared successfully!");
-      setUserData({
-        ...userData,
-        username: "",
-      }); // Reset to default values
     } catch (e) {
       console.error("Failed to clear the AsyncStorage:", e);
       Alert.alert("Error clearing data.");
     }
   };
-
+  
   useEffect(() => {
     loadUserData();
     if (!initialLoad) {
       setLoading(true);
       setTimeout(handleInitialLoad, 2000);
     }
-  }, [initialLoad]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadUserData();
+    });
+    return () => {
+      unsubscribe();
+    }
+  }, [initialLoad, navigation]);
 
 
   const loadUserData = async () => {
     try {
-      // Assuming the user data is stored under a specific key in AsyncStorage
-      const storedUserData = await AsyncStorage.getItem('userDetails');
-      console.log(storedUserData)
-      if (storedUserData) {
-        setUserData(JSON.parse(storedUserData));
+      const jsonString = await AsyncStorage.getItem('userDetails');
+      console.log(jsonString)
+      if (jsonString) {
+        const parsedData = JSON.parse(jsonString);
+        console.log(parsedData)
+        setUserData(parsedData.userDetails || {});
       }
-      setLoading(false);
     } catch (error) {
-      console.error('Error loading user data', error);
+      console.log('Error fetching user details:', error);
     }
+  };
+
+  const handleUserClick = (userId) => {
+    navigation.navigate('MainPage', { userId });
   };
 
   const handleNavigation = async () => {
@@ -82,15 +94,6 @@ const LoginScreen = () => {
     setUsername('')
     navigation.navigate("LoginPage", {userId,username});
   }
-
-  const clearAsyncStorage = async () => {
-    try {
-      await AsyncStorage.clear();
-      console.log("AsyncStorage cleared");
-    } catch (error) {
-      console.error("Error clearing AsyncStorage", error);
-    }
-  };
 
   if (loading) {
     return (
@@ -125,6 +128,15 @@ const LoginScreen = () => {
             <Text style={styles.signUpButtonText}>Clear Data</Text>
           </TouchableOpacity>
         <Text style={styles.accounts}>Your Accounts</Text>
+        {Object.keys(userData).map((userId) => (
+        <TouchableOpacity
+          key={userId}
+          style={styles.userBox}
+          onPress={() => handleUserClick(userId)}>
+          <Text style={styles.userName}>{userData[userId].name}</Text>
+          <Text style={styles.cashAmount}>Cash Amount: {userData[userId].cashAmount}</Text>
+        </TouchableOpacity>
+      ))}
       </ScrollView>
     </KeyboardAvoidingView>
   </SafeAreaView>
@@ -145,6 +157,28 @@ loadingContainer: {
   alignItems: "center",
   backgroundColor: "#f0f4f7",
 },
+userBox: {
+  width: '80%',
+  padding: 20,
+  marginVertical: 10,
+  backgroundColor: '#00ADB5',
+  borderRadius: 10,
+  alignItems: 'center',
+  flexDirection: "row",
+  justifyContent: "space-between",
+},
+userName: {
+  fontSize: 20,
+  fontWeight:  "bold",
+  textAlign: "left",
+  color: '#ffb703',
+  alignSelf: 'flex-start' 
+},
+cashAmount: {
+  fontSize: 15,
+  textAlign: "right",
+  color: "#ffffff"
+},
 enterDetailsText: {
   fontSize: 36,
   fontWeight: "bold",
@@ -163,7 +197,7 @@ accounts: {
   fontSize: 36,
   fontWeight: "bold",
   color: "#333",
-  marginBottom: 40,
+  marginBottom: 20,
   textAlign: "center",
 },
 input: {

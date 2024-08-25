@@ -19,6 +19,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
+
 import rupeeIcon from "../../assets/RupeeIcon.png"; // Adjust the path based on your folder structure
 import dollarIcon from "../../assets/DollarIcon.png"; // Adjust the path based on your folder structure
 import euroIcon from "../../assets/EuroIcon.png"; // Adjust the path based on your folder structure
@@ -31,7 +32,7 @@ const LandingScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { userId, username } = route.params;
-  console.log(username)
+  const [selectedCurrency, setSelectedCurrency] = useState("RupeeIcon.png");
   const [userData, setUserData] = useState({
     name: "",
     cashAmount: "",
@@ -47,14 +48,12 @@ const LandingScreen = () => {
     const existingData = await AsyncStorage.getItem("userDetails");
   
     if (existingData) {
-      console.log("Data Exist")
+      ("Data Exist")
       const data = JSON.parse(existingData);
-      console.log(data)
       
   
       // Save the updated data back to AsyncStorage
       await AsyncStorage.setItem("userDetails", JSON.stringify(data));
-      console.log("Username updated in AsyncStorage for user 119");
     
     }
     retrieveData();  // Retrieve data to update the UI
@@ -85,7 +84,6 @@ const LandingScreen = () => {
       name: username,
     };
     await AsyncStorage.setItem("userDetails", JSON.stringify(allUserDetails));
-    console.log("Data successfully stored for user:", userId);
   };
 
   const handleCashAmountChange = (text) => {
@@ -115,7 +113,6 @@ const LandingScreen = () => {
   const handleNavigation = async () => {
     if (userData.cashAmount) {
       // Ensure value is not empty
-      console.log("Navigating with cashAmount:", userData.cashAmount);
       try {
 
         const jsonString = await AsyncStorage.getItem("userDetails");
@@ -157,8 +154,11 @@ const LandingScreen = () => {
           "userDetails",
           JSON.stringify(allUserDetails)
         );
-        console.log("Data successfully stored with icon name:", iconName);
-        console.log("Hi",userId)
+
+        setUserData((prevData) => ({
+          ...prevData,
+          cashAmount: ""
+        }));
         // Navigation
         navigation.navigate("MainPage", { userId: userId });
       } catch (e) {
@@ -198,23 +198,43 @@ const LandingScreen = () => {
                 placeholder="Enter Cash Amount"
               />
               <View style={styles.currencyContainer}>
-                <TouchableOpacity
-                  onPress={() => handleCurrencySelection(rupeeIcon)}>
-                  <Image source={rupeeIcon} style={styles.currencyIcon} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleCurrencySelection(dollarIcon)}>
-                  <Image source={dollarIcon} style={styles.currencyIcon} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleCurrencySelection(euroIcon)}>
-                  <Image source={euroIcon} style={styles.currencyIcon} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleCurrencySelection(poundIcon)}>
-                  <Image source={poundIcon} style={styles.currencyIcon} />
-                </TouchableOpacity>
-              </View>
+  <TouchableOpacity
+    onPress={() => handleCurrencySelection(rupeeIcon)}
+    style={[
+      styles.currencyBox,
+      userData.selectedCurrencyIcon === rupeeIcon && styles.selectedCurrencyBox
+    ]}
+  >
+    <Image source={rupeeIcon} style={styles.currencyIcon} />
+  </TouchableOpacity>
+  <TouchableOpacity
+    onPress={() => handleCurrencySelection(dollarIcon)}
+    style={[
+      styles.currencyBox,
+      userData.selectedCurrencyIcon === dollarIcon && styles.selectedCurrencyBox
+    ]}
+  >
+    <Image source={dollarIcon} style={styles.currencyIcon} />
+  </TouchableOpacity>
+  <TouchableOpacity
+    onPress={() => handleCurrencySelection(euroIcon)}
+    style={[
+      styles.currencyBox,
+      userData.selectedCurrencyIcon === euroIcon && styles.selectedCurrencyBox
+    ]}
+  >
+    <Image source={euroIcon} style={styles.currencyIcon} />
+  </TouchableOpacity>
+  <TouchableOpacity
+    onPress={() => handleCurrencySelection(poundIcon)}
+    style={[
+      styles.currencyBox,
+      userData.selectedCurrencyIcon === poundIcon && styles.selectedCurrencyBox
+    ]}
+  >
+    <Image source={poundIcon} style={styles.currencyIcon} />
+  </TouchableOpacity>
+</View>
               <TouchableOpacity
                 style={styles.button}
                 onPress={handleNavigation}>
@@ -297,9 +317,23 @@ const styles = StyleSheet.create({
   currencyContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
     width: "100%",
     marginTop: 20,
     marginBottom: 20,
+  },
+  currencyBox: {
+    padding: 5,
+    borderRadius: 5,
+    alignItems: 'center',  // Center the icon horizontally
+    justifyContent: 'center',
+  },
+  selectedCurrencyBox: {
+    borderColor: '#000', // Black border for selected currency
+    borderWidth: 3,
+    paddingLeft: 10,     // Add paddingLeft to adjust alignment
+    paddingRight: 0, 
   },
   button: {
     marginTop: 20,
