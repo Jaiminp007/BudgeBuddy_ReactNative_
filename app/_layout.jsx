@@ -1,17 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Drawer } from "expo-router/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
-import { useNavigation, DrawerActions } from "@react-navigation/native";
+import { useNavigation, DrawerActions, useRoute } from "@react-navigation/native";
 import { useTheme } from "react-native-paper";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
-import { Slot, useSegments } from "expo-router";
+import { router, Slot, useSegments } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authService } from "./services/apiHost";
 
+
 const CustomHeaderLeft = () => {
   const navigation = useNavigation();
-
   return (
     <TouchableOpacity
       onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
@@ -22,14 +22,16 @@ const CustomHeaderLeft = () => {
   );
 };
 
-const CustomDrawerContent = (props) => {
+const CustomDrawerContent = ({props, route}) => {
+  const navigation = useNavigation();
   const { colors } = useTheme();
 
   const handleLogout = async () => {
     // Clear the auth token and credentials from memory and AsyncStorage
-    props.navigation.navigate("index");
+    navigation.navigate("index");
 
   };
+  
 
   return (
     <View style={{ flex: 1 }}>
@@ -39,7 +41,8 @@ const CustomDrawerContent = (props) => {
             <Ionicons name="home-outline" color={color} size={size} />
           )}
           label="Dashboard"
-          onPress={() => props.navigation.navigate("MainPage")}
+          onPress={() => navigation.navigate("MainPage", {userId: userId})}
+
         />
         <DrawerItem
           icon={({ color, size }) => (
@@ -50,7 +53,7 @@ const CustomDrawerContent = (props) => {
             />
           )}
           label="Feedback"
-          onPress={() => props.navigation.navigate("feedback")}
+          onPress={() => navigation.navigate("feedback")}
         />
         <DrawerItem
           icon={({ color, size }) => (
@@ -64,8 +67,7 @@ const CustomDrawerContent = (props) => {
       </DrawerContentScrollView>
     </View>
   );
-};
-
+}
 export default function Layout() {
   const segments = useSegments();
   const isLoginRoute = segments.length === 0 || segments[0] === "login";

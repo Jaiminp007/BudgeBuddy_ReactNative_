@@ -22,6 +22,11 @@ const white = "#ffffff";
 const blue = "#264653";
 const yellow = "#ffb703";
 
+import rupeeIcon from "../../assets/RupeeIcon.png"; // Adjust the path based on your folder structure
+import dollarIcon from "../../assets/DollarIcon.png"; // Adjust the path based on your folder structure
+import euroIcon from "../../assets/EuroIcon.png"; // Adjust the path based on your folder structure
+import poundIcon from "../../assets/PoundIcon.png"; // Adjust the path based on your folder structure
+
 const MainScreen = ({ }) => {
   /*
   const router = useRouter();
@@ -47,6 +52,7 @@ const MainScreen = ({ }) => {
   const [cashAmount, setCashAmount] = useState(0);
   const [topExpenses, setTopExpenses] = useState([]);
   const [cashHistory, setCashHistory] = useState([]);
+  const [currencyIcon, setCurrencyIcon] = useState("");
   
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
@@ -86,7 +92,9 @@ const MainScreen = ({ }) => {
 
   // handleMenuPress function defined here
   const handleMenuPress = () => {
-    navigation.dispatch(DrawerActions.openDrawer());
+
+
+    navigation.dispatch(DrawerActions.openDrawer(), {userId: userId});
   };
 
   const handleNavigation = async () => {
@@ -115,8 +123,17 @@ const MainScreen = ({ }) => {
             console.log(cashHistory)
             setCashHistory(cashHistory)
           }
+          const currencyIcon = userData["selectedCurrencyIcon"];
+          if (currencyIcon == "RupeeIcon.png") {
+            setCurrencyIcon(rupeeIcon);
+          }else if(currencyIcon == "EuroIcon.png") {
+            setCurrencyIcon(euroIcon);
+          }else if (currencyIcon == "PoundIcon.png"){
+            setCurrencyIcon(euroIcon);
+          }else{
+            setCurrencyIcon(dollarIcon);
+          }
           const cashAmount = userData["cashAmount"]; // Retrieve cashAmount directly from userData
-          console.log("Cash Amount:", cashAmount);
           setCashAmount(cashAmount); // Set the cashAmount state
         }
       }
@@ -169,6 +186,8 @@ const MainScreen = ({ }) => {
       <View style={styles.row}>
         <View style={styles.box}>
           <Text style={styles.boxTextHeading}>Cash Amount</Text>
+          <View style={styles.currencyBox}>
+          <Image source={currencyIcon} style={styles.currencyIconCash} />
           <View style={styles.cashAmountContainer}>
             {/* {currencyIcon ? ( 
               <Image source={currencyIcon} style={styles.currencyIconCash} />
@@ -178,27 +197,36 @@ const MainScreen = ({ }) => {
             <Text style={styles.boxTextParaCash}>
               {cashAmount}
             </Text>
+            </View>
           </View>
         </View>
   
         <View style={styles.box}>
           <Text style={styles.boxTextHeading}>Top Expenses</Text>
-  
           {topExpenses.length > 0 ? (
-            <Text style={styles.boxTextPara}>{topExpenses[0]}</Text>
-          ) : (
-            <Text style={styles.boxTextPara}>No Expenses</Text>
-          )}
-  
-          {topExpenses.length > 1 && (
-            <Text style={styles.boxTextPara}>{topExpenses[1]}</Text>
-          )}
-  
-          {topExpenses.length > 2 && (
-            <Text style={styles.boxTextPara}>{topExpenses[2]}</Text>
-          )}
+      <>
+        <View style={styles.expenseItem}>
+          <Image source={currencyIcon} style={styles.currencyIcon} />
+          <Text style={styles.boxTextPara}>{topExpenses[0]}</Text>
         </View>
-      </View>
+        {topExpenses.length > 1 && (
+          <View style={styles.expenseItem}>
+            <Image source={currencyIcon} style={styles.currencyIcon} />
+            <Text style={styles.boxTextPara}>{topExpenses[1]}</Text>
+          </View>
+        )}
+        {topExpenses.length > 2 && (
+          <View style={styles.expenseItem}>
+            <Image source={currencyIcon} style={styles.currencyIcon} />
+            <Text style={styles.boxTextPara}>{topExpenses[2]}</Text>
+          </View>
+        )}
+      </>
+    ) : (
+      <Text style={styles.boxTextPara}>No Expenses</Text>
+    )}
+  </View>
+</View>
   
       <View style={styles.bigBox}>
         <Text style={styles.bigBoxText}>Graph</Text>
@@ -346,9 +374,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
   },
+  expenseItem: {
+    alignItems: 'center',
+  flexDirection: "row",
+  justifyContent: "flex-start",
+  },
+  currencyBox: {
+    alignItems: 'center',
+  flexDirection: "row",
+  justifyContent: "flex-start",
+  },
   currencyIconCash: {
-    width: 23, // Adjust the size of the currency icon
-    height: 23,
+    width: 30, // Adjust the size of the currency icon
+    height: 30,
     marginRight: 2,
     tintColor: white,
     marginTop: 2,
@@ -386,7 +424,7 @@ const styles = StyleSheet.create({
     fontFamily: "System",
   },
   boxTextParaCash: {
-    fontSize: 25,
+    fontSize: 30,
     color: white,
     textAlign: "left",
     fontFamily: "System",
