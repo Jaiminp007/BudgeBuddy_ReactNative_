@@ -12,21 +12,28 @@ import {
   Platform,
   ActivityIndicator,
   SafeAreaView,
-  Alert
+  Alert,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { CheckBox } from "react-native-elements";
 import { authService } from "../services/apiHost";
 import { useNavigation, useFocusEffect } from "@react-navigation/native"; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import GlobalData from "../GlobalData";
+
+import rupeeIcon from "../../assets/RupeeIcon.png"; // Adjust the path based on your folder structure
+import dollarIcon from "../../assets/DollarIcon.png"; // Adjust the path based on your folder structure
+import euroIcon from "../../assets/EuroIcon.png"; // Adjust the path based on your folder structure
+import poundIcon from "../../assets/PoundIcon.png"; 
 
 const LoginScreen = () => {
   const navigation = useNavigation();
-
   const [loading, setLoading] = useState(true);
   const [initialLoad, setInitialLoad] = useState(false);
   const [username, setUsername] = useState("");
   const [userData, setUserData] = useState(null);
+  const [currencyIcon, setCurrencyIcon] = useState("");
 
   const router = useRouter();
 
@@ -40,6 +47,8 @@ const LoginScreen = () => {
 
   const clearAllData = async () => {
     try {
+      GlobalData.userid = null;
+    console.log("Global Data resets")
       // Clear all user details from AsyncStorage
       await AsyncStorage.removeItem('userDetails');
       console.log("All data cleared successfully");
@@ -78,6 +87,16 @@ const LoginScreen = () => {
         const parsedData = JSON.parse(jsonString);
         console.log(parsedData)
         setUserData(parsedData.userDetails || {});
+        const currencyIcon = userData["selectedCurrencyIcon"];
+          if (currencyIcon == "RupeeIcon.png") {
+            setCurrencyIcon(rupeeIcon);
+          }else if(currencyIcon == "EuroIcon.png") {
+            setCurrencyIcon(euroIcon);
+          }else if (currencyIcon == "PoundIcon.png"){
+            setCurrencyIcon(poundIcon);
+          }else{
+            setCurrencyIcon(dollarIcon);
+          }
       }
     } catch (error) {
       console.log('Error fetching user details:', error);
@@ -127,20 +146,36 @@ const LoginScreen = () => {
         <TouchableOpacity style={styles.signUpButton} onPress={clearAllData}>
             <Text style={styles.signUpButtonText}>Clear Data</Text>
           </TouchableOpacity>
-        <Text style={styles.accounts}>Your Accounts</Text>
-        {Object.keys(userData).map((userId) => (
-        <TouchableOpacity
-          key={userId}
-          style={styles.userBox}
-          onPress={() => handleUserClick(userId)}>
-          <Text style={styles.userName}>{userData[userId].name}</Text>
-          <Text style={styles.cashAmount}>Cash Amount: {userData[userId].cashAmount}</Text>
-        </TouchableOpacity>
-      ))}
-      </ScrollView>
-    </KeyboardAvoidingView>
-  </SafeAreaView>
-);
+          <Text style={styles.accounts}>Your Accounts</Text>
+          {Object.keys(userData).map((userId) => {
+            const currencyIcon = userData[userId].selectedCurrencyIcon;
+            let selectedIcon;
+            if (currencyIcon === "RupeeIcon.png") {
+              selectedIcon = rupeeIcon;
+            } else if (currencyIcon === "EuroIcon.png") {
+              selectedIcon = euroIcon;
+            } else if (currencyIcon === "PoundIcon.png") {
+              selectedIcon = poundIcon;
+            } else {
+              selectedIcon = dollarIcon;
+            }
+            return (
+              <TouchableOpacity
+                key={userId}
+                style={styles.userBox}
+                onPress={() => handleUserClick(userId)}
+              >
+                <Text style={styles.userName}>{userData[userId].name}</Text>
+                <Text style={styles.cashAmountText}>Cash Amount: </Text>
+                <Image source={selectedIcon} style={styles.image} />
+                <Text style={styles.cashAmount}>{userData[userId].cashAmount}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -167,12 +202,24 @@ userBox: {
   flexDirection: "row",
   justifyContent: "space-between",
 },
+image: {
+  width: 20,
+  height: 20,
+  marginTop: 2,
+  tintColor: "white",
+},
 userName: {
   fontSize: 20,
   fontWeight:  "bold",
   textAlign: "left",
   color: '#ffb703',
   alignSelf: 'flex-start' 
+},
+cashAmountText: {
+  fontSize: 15,
+  textAlign: "right",
+  color: "#ffffff",
+  marginLeft: 43,
 },
 cashAmount: {
   fontSize: 15,

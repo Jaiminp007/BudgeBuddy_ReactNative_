@@ -15,8 +15,11 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useRouter, useFocusEffect } from "expo-router";
+import GlobalData from "../GlobalData";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const FeedbackForm = () => {
+  const navigation = useNavigation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -89,6 +92,12 @@ const FeedbackForm = () => {
       });
   };
 
+  const handleDashboard = async() => {
+    const userid = GlobalData.userid
+    console.log(userid)
+    navigation.navigate("MainPage", {userId: userid})
+  }
+
   if (submitted) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: "#f8f9fa" }}>
@@ -110,7 +119,7 @@ const FeedbackForm = () => {
             <View style={styles.buttonContainer}>
               <Button
                 title="Go to Dashboard"
-                onPress={() => router.push("/dashboard")}
+                onPress={handleDashboard}
                 color="#007bff"
               />
             </View>

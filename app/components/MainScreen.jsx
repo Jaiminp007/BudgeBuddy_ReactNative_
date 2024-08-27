@@ -14,6 +14,7 @@ import addIcon from "../../assets/AddIcon.png";
 import { DrawerActions } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LineChart } from "react-native-chart-kit";
+import GlobalData from "../GlobalData";
 
 const lightGreen = "#7ae582";
 const darkGreen = "#40916c";
@@ -44,8 +45,9 @@ const MainScreen = ({ }) => {
 
   const navigation = useNavigation();
   const route = useRoute();
-  const {userId} = route.params; // Retrieve userId from navigation params
-  console.log("User ID retrieved from route params:", userId);
+    const {userId} = route.params;
+    console.log(userId)
+ // Retrieve userId from navigation params
 
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -92,9 +94,9 @@ const MainScreen = ({ }) => {
 
   // handleMenuPress function defined here
   const handleMenuPress = () => {
-
-
-    navigation.dispatch(DrawerActions.openDrawer(), {userId: userId});
+    GlobalData.userid = userId;
+    console.log("Username set in GlobalData:", GlobalData.userid);
+    navigation.dispatch(DrawerActions.openDrawer());
   };
 
   const handleNavigation = async () => {
@@ -115,12 +117,10 @@ const MainScreen = ({ }) => {
           setUserData(userData); // Set the userData state
           if (userData["Topexpenses"]){
           const expenseList = userData["Topexpenses"];
-          console.log(expenseList);
           setTopExpenses(expenseList);
           }
           if (userData["cashHistory"]){
             const cashHistory = userData["cashHistory"]
-            console.log(cashHistory)
             setCashHistory(cashHistory)
           }
           const currencyIcon = userData["selectedCurrencyIcon"];
@@ -129,7 +129,7 @@ const MainScreen = ({ }) => {
           }else if(currencyIcon == "EuroIcon.png") {
             setCurrencyIcon(euroIcon);
           }else if (currencyIcon == "PoundIcon.png"){
-            setCurrencyIcon(euroIcon);
+            setCurrencyIcon(poundIcon);
           }else{
             setCurrencyIcon(dollarIcon);
           }
@@ -146,7 +146,6 @@ const MainScreen = ({ }) => {
   
   useEffect(() => {
     const focusListener = navigation.addListener('focus', () => {
-      console.log("Screen is focused");
       fetchData();
       });
 
@@ -387,16 +386,16 @@ const styles = StyleSheet.create({
   currencyIconCash: {
     width: 30, // Adjust the size of the currency icon
     height: 30,
-    marginRight: 2,
+    marginRight: 5,
     tintColor: white,
     marginTop: 2,
   },
   currencyIcon: {
     width: 20, // Adjust the size of the currency icon
     height: 20,
-    marginRight: 0,
+    marginRight: 2,
     tintColor: white,
-    marginTop: 2,
+    marginTop: 3,
   },
   boxTextHeading: {
     fontSize: 17,

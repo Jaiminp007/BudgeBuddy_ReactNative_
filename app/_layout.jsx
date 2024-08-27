@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Drawer } from "expo-router/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
@@ -6,9 +6,10 @@ import { useNavigation, DrawerActions, useRoute } from "@react-navigation/native
 import { useTheme } from "react-native-paper";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { router, Slot, useSegments } from "expo-router";
+import GlobalData from "./GlobalData";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authService } from "./services/apiHost";
-
 
 const CustomHeaderLeft = () => {
   const navigation = useNavigation();
@@ -22,16 +23,29 @@ const CustomHeaderLeft = () => {
   );
 };
 
-const CustomDrawerContent = ({props, route}) => {
+const CustomDrawerContent = ({props}) => {
+  const [userId, setUserId] = useState(null);
   const navigation = useNavigation();
   const { colors } = useTheme();
 
   const handleLogout = async () => {
+    GlobalData.userid = null;
+    console.log("Global Data resets")
     // Clear the auth token and credentials from memory and AsyncStorage
     navigation.navigate("index");
 
   };
-  
+
+  const handleDashboard = async () => {
+    const userid = GlobalData.userid
+    setUserId(GlobalData.userid);
+    console.log("Username retrieved from GlobalData in _layout:", GlobalData.userid);
+    console.log(userid)
+    navigation.navigate("MainPage", {userId: userid})
+  }
+  useEffect(() => {
+
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
@@ -41,7 +55,7 @@ const CustomDrawerContent = ({props, route}) => {
             <Ionicons name="home-outline" color={color} size={size} />
           )}
           label="Dashboard"
-          onPress={() => navigation.navigate("MainPage", {userId: userId})}
+          onPress={handleDashboard}
 
         />
         <DrawerItem

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Image} from 'react-native';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DrawerActions } from "@react-navigation/native";
 const lightGreen = '#7ae582';
 const darkGreen = '#40916c';
 const black = '#040303';
 const white = '#ffffff';
 const yellow = "#ffb703";
 const blue = "#264653";
+import menuIcon from "../../assets/MenuIcon.png";
+import { Menu } from 'react-native-paper';
 
 const ExpenseScreen = () => {
   const [date, setDate] = useState('');
@@ -60,6 +63,7 @@ const ExpenseScreen = () => {
   };
 
   const handleMenuPress = () => {
+
     navigation.dispatch(DrawerActions.openDrawer());
   };
 
@@ -141,7 +145,12 @@ const ExpenseScreen = () => {
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <View style={styles.container}>
-        <Text style={styles.title}>Add a New Expense</Text>
+        <View style={styles.Menu}>
+        <Text style={styles.title}>Add New Expense</Text>
+      <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
+          <Image source={menuIcon} style={styles.menuIcon} />
+        </TouchableOpacity>
+        </View>
         
         <View style={styles.formContainer}>
           <TextInput
@@ -201,16 +210,26 @@ const styles = StyleSheet.create({
     backgroundColor: white, 
   },
   title: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 25,
     marginBottom: 30,
-    color: blue, 
+    color: blue,
+    textAlign: "left", 
+    marginLeft: 5,
   },
   menuButton: {
     padding: 10,
     marginBottom: 8,
+    marginTop:7,
+    marginLeft: 40,
+  },
+  Menu:{
+    flexDirection: "row",
+    justifyContent: "flex-start", // Aligns items to the start (left side)
+    alignItems: "center", // Centers items vertically
+    marginBottom: 0,
   },
   menuIcon: {
     width: 30,
@@ -249,7 +268,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    marginBottom: 20,
+    marginBottom: 40,
   },
   noteInput: {
     width: '100%',
@@ -264,7 +283,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   buttonContainer: {
-    marginTop: 20,
+    marginTop: 0,
     backgroundColor: darkGreen,  
     borderRadius: 6,
     width: 170,
@@ -287,8 +306,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: -18,
-    marginBottom: 30,
+    marginTop: -25,
+    marginBottom: 40,
   }
 });
 
