@@ -46,7 +46,6 @@ const MainScreen = ({ }) => {
   const navigation = useNavigation();
   const route = useRoute();
     const {userId} = route.params;
-    console.log(userId)
  // Retrieve userId from navigation params
 
   const [userData, setUserData] = useState(null);
@@ -95,7 +94,6 @@ const MainScreen = ({ }) => {
   // handleMenuPress function defined here
   const handleMenuPress = () => {
     GlobalData.userid = userId;
-    console.log("Username set in GlobalData:", GlobalData.userid);
     navigation.dispatch(DrawerActions.openDrawer());
   };
 
@@ -103,11 +101,8 @@ const MainScreen = ({ }) => {
     navigation.navigate("ExpensePage", {userId: userId});
   }
   const fetchData = async () => {
-    try {
-      setLoading(true); // Start loading before fetching data
   
-      const jsonString = await AsyncStorage.getItem("userDetails");
-      console.log("Retrieved jsonString:", jsonString); // Check what is being retrieved from AsyncStorage
+      const jsonString = await AsyncStorage.getItem("userDetails"); // Check what is being retrieved from AsyncStorage
       
       if (jsonString) {
         const allData = JSON.parse(jsonString);
@@ -137,22 +132,32 @@ const MainScreen = ({ }) => {
           setCashAmount(cashAmount); // Set the cashAmount state
         }
       }
-    } catch (e) {
-      console.error("Failed to fetch data from storage:", e);
-    } finally {
-      setLoading(false); // Stop loading after data retrieval
-    }
+    
   };
   
   useEffect(() => {
-    const focusListener = navigation.addListener('focus', () => {
-      fetchData();
-      });
+    const loadWithDelay = async () => {
+      setLoading(true);
+      await fetchData();
+      setTimeout(() => {
+        setLoading(false);
+      },200); // 1.5-second delay
+    };
+
+    loadWithDelay();
+
+    const focusListener = navigation.addListener("focus", () => {
+      loadWithDelay();
+    });
+
+    return () => {
+      // Clean up the listener when the component unmounts
+      focusListener();
+    };
+  }, [navigation, userId]);
+
 
     
-    // Clean up the listener when the component unmounts
-
-  }, [navigation, userId]);
   
   if (loading) {
     return (
@@ -186,14 +191,22 @@ const MainScreen = ({ }) => {
         <View style={styles.box}>
           <Text style={styles.boxTextHeading}>Cash Amount</Text>
           <View style={styles.currencyBox}>
-          <Image source={currencyIcon} style={styles.currencyIconCash} />
+          <Image source={currencyIcon} style={[
+            styles.currencyIconCash,
+            cashAmount > 100000
+            ? {width: 24, height: 24}
+            : {width: 30, height: 30}
+            ]} />
           <View style={styles.cashAmountContainer}>
             {/* {currencyIcon ? ( 
               <Image source={currencyIcon} style={styles.currencyIconCash} />
             ) : (
               <Text style={styles.fallbackText}>No Icon</Text> 
             )}*/}
-            <Text style={styles.boxTextParaCash}>
+            <Text style={[
+              styles.boxTextParaCash,
+              cashAmount > 100000 ? { fontSize: 24 } : { fontSize: 30 }
+              ]}>
               {cashAmount}
             </Text>
             </View>
@@ -272,6 +285,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: white,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     flexDirection: "row",

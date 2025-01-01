@@ -68,7 +68,7 @@ const FeedbackForm = () => {
       return;
     }
 
-    fetch("https://formspree.io/f/xdknkkla", {
+    fetch("https://formspree.io/f/mrbzjlal", {
       // Replace with your Formspree form endpoint
       method: "POST",
       headers: {
@@ -94,7 +94,6 @@ const FeedbackForm = () => {
 
   const handleDashboard = async() => {
     const userid = GlobalData.userid
-    console.log(userid)
     navigation.navigate("MainPage", {userId: userid})
   }
 

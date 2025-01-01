@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Image} from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback,Alert, Keyboard, Image} from 'react-native';
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerActions } from "@react-navigation/native";
@@ -26,41 +26,26 @@ const ExpenseScreen = () => {
   const { userId } = route.params;
 
   const inspectStorage = async () => {
-    try {
       const jsonString = await AsyncStorage.getItem("userDetails");
       if (jsonString) {
         const allData = JSON.parse(jsonString);
-        console.log("Complete userDetails stored in AsyncStorage:", allData);
-      } else {
-        console.log("No data found in AsyncStorage.");
       }
-    } catch (error) {
-      console.error("Error inspecting AsyncStorage:", error);
-    }
   };
 
   const retrieveData = async () => {
-    try {
       const jsonString = await AsyncStorage.getItem("userDetails");
-      console.log("Retrieved jsonString:", jsonString); // Check what is being retrieved from AsyncStorage
+       // Check what is being retrieved from AsyncStorage
       if (jsonString) {
         const allData = JSON.parse(jsonString);
-        console.log("Parsed allData:", allData); // Log the parsed JSON to check structure
+        // Log the parsed JSON to check structure
         const userDetails = allData.userDetails[userId]; // Adjusted to reflect the correct path to userDetails
-        console.log("userDetails object:", userDetails); // Further log to confirm the structure
+        // Further log to confirm the structure
         if (userDetails) {
           setUserData(userDetails);
           setCashAmount(userDetails.cashAmount);
-        } else {
-          console.log("User data not found for ID:", userId);
-        }
-      } else {
-        console.log("No user data found in AsyncStorage.");
-      }
-    } catch (e) {
-      console.error("Failed to fetch data from storage:", e);
-    }
-  };
+        } 
+  }
+}
 
   const handleMenuPress = () => {
 
@@ -68,7 +53,13 @@ const ExpenseScreen = () => {
   };
 
   const handleAddExpense = async () => {
-    try {
+    if (!amount || isNaN(parseFloat(amount) )) {
+      Alert.alert("Invalid Input", "Please enter a valid amount.");
+      return; // Exit the function early
+    }else if (amount == 0){
+      Alert.alert("Invalid Input", "Please enter a valid amount.");
+      return;
+    }
       // Retrieve the entire object from AsyncStorage
       const jsonString = await AsyncStorage.getItem('userDetails');
       const storageData = jsonString ? JSON.parse(jsonString) : {};
@@ -124,13 +115,9 @@ const ExpenseScreen = () => {
         
         // Navigate back to the main page
         navigation.navigate('MainPage', { userId });
-      } else {
-        console.error('User not found');
-      }
+      } 
     
-    } catch (error) {
-      console.error('Error adding expense:', error);
-    }
+
   };
   
   useEffect(() => {

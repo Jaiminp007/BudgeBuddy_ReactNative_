@@ -62,7 +62,6 @@ const LandingScreen = () => {
 
   const retrieveData = async () => {
     const jsonString = await AsyncStorage.getItem("userDetails");
-    console.log(jsonString)
     if (jsonString) {
       const userDetails = JSON.parse(jsonString).userDetails[userId];
       if (userDetails) {
@@ -94,26 +93,9 @@ const LandingScreen = () => {
     setUserData({ ...userData, selectedCurrencyIcon: icon });
   };
 
-  const clearAllData = async () => {
-    try {
-      await AsyncStorage.clear();
-      console.log("All data cleared successfully");
-      Alert.alert("All data cleared successfully!");
-      setUserData({
-        ...userData,
-        cashAmount: "",
-        selectedCurrencyIcon: rupeeIcon,
-      }); // Reset to default values
-    } catch (e) {
-      console.error("Failed to clear the AsyncStorage:", e);
-      Alert.alert("Error clearing data.");
-    }
-  };
-
   const handleNavigation = async () => {
     if (userData.cashAmount) {
       // Ensure value is not empty
-      try {
 
         const jsonString = await AsyncStorage.getItem("userDetails");
         let allUserDetails = jsonString ? JSON.parse(jsonString) : { userDetails: {} };
@@ -161,14 +143,7 @@ const LandingScreen = () => {
         }));
         // Navigation
         navigation.navigate("MainPage", { userId: userId });
-      } catch (e) {
-        console.log("Failed to save the data to the storage:", e);
-        Alert.alert("Error saving data. Please try again.");
-      }
-    } else {
-      Alert.alert("Please enter a valid cash amount");
-    }
-  };
+  }};
 
   if (loading) {
     return (
@@ -240,9 +215,6 @@ const LandingScreen = () => {
                 onPress={handleNavigation}>
                 <Text style={styles.buttonText}>Begin your Journey</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.button} onPress={clearAllData}>
-                <Text style={styles.buttonText}>Clear Data</Text>
-              </TouchableOpacity>
             </View>
           </TouchableWithoutFeedback>
         </ScrollView>
@@ -305,7 +277,9 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 40,
+    height: 30,
+    minHeight: 40,  // Prevent shrinking
+  maxHeight: 60, 
     borderColor: "gray",
     borderWidth: 1,
     padding: 8,
@@ -321,7 +295,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     width: "100%",
     marginTop: 20,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   currencyBox: {
     padding: 5,

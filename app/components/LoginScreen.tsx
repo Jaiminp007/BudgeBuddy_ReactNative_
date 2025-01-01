@@ -21,6 +21,7 @@ import { authService } from "../services/apiHost";
 import { useNavigation, useFocusEffect } from "@react-navigation/native"; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GlobalData from "../GlobalData";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import rupeeIcon from "../../assets/RupeeIcon.png"; // Adjust the path based on your folder structure
 import dollarIcon from "../../assets/DollarIcon.png"; // Adjust the path based on your folder structure
@@ -44,23 +45,13 @@ const LoginScreen = () => {
     setLoading(false);
     setInitialLoad(true);
   };
-
-  const clearAllData = async () => {
+  
+  const clearAsyncStorage = async () => {
     try {
-      GlobalData.userid = null;
-    console.log("Global Data resets")
-      // Clear all user details from AsyncStorage
-      await AsyncStorage.removeItem('userDetails');
-      console.log("All data cleared successfully");
-  
-      // Update the state to remove all user boxes from the UI
-      setUserData({});
-  
-      // Notify the user of the successful deletion
-      Alert.alert("All data cleared successfully!");
-    } catch (e) {
-      console.error("Failed to clear the AsyncStorage:", e);
-      Alert.alert("Error clearing data.");
+      await AsyncStorage.clear();
+      console.log('AsyncStorage cleared successfully');
+    } catch (error) {
+      console.error('Failed to clear AsyncStorage:', error);
     }
   };
   
@@ -80,27 +71,23 @@ const LoginScreen = () => {
 
 
   const loadUserData = async () => {
-    try {
       const jsonString = await AsyncStorage.getItem('userDetails');
-      console.log(jsonString)
       if (jsonString) {
         const parsedData = JSON.parse(jsonString);
-        console.log(parsedData)
         setUserData(parsedData.userDetails || {});
-        const currencyIcon = userData["selectedCurrencyIcon"];
-          if (currencyIcon == "RupeeIcon.png") {
+        if (parsedData.userDetails) {
+          const currencyIcon = parsedData.userDetails["selectedCurrencyIcon"];
+          if (currencyIcon === "RupeeIcon.png") {
             setCurrencyIcon(rupeeIcon);
-          }else if(currencyIcon == "EuroIcon.png") {
+          } else if (currencyIcon === "EuroIcon.png") {
             setCurrencyIcon(euroIcon);
-          }else if (currencyIcon == "PoundIcon.png"){
+          } else if (currencyIcon === "PoundIcon.png") {
             setCurrencyIcon(poundIcon);
-          }else{
+          } else {
             setCurrencyIcon(dollarIcon);
           }
+        }
       }
-    } catch (error) {
-      console.log('Error fetching user details:', error);
-    }
   };
 
   const handleUserClick = (userId) => {
@@ -108,8 +95,11 @@ const LoginScreen = () => {
   };
 
   const handleNavigation = async () => {
+    if (username == null) {
+      Alert.alert("Invalid Input", "Please enter a valid name.");
+      return; // Exit the function early
+    }
     const userId = Math.floor(100 + Math.random() * 900);
-    console.log(userId)
     setUsername('')
     navigation.navigate("LoginPage", {userId,username});
   }
@@ -123,7 +113,7 @@ const LoginScreen = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -143,38 +133,53 @@ const LoginScreen = () => {
         onPress={handleNavigation}>
           <Text style={styles.signUpButtonText}>Sign Up</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.signUpButton} onPress={clearAllData}>
-            <Text style={styles.signUpButtonText}>Clear Data</Text>
-          </TouchableOpacity>
-          <Text style={styles.accounts}>Your Accounts</Text>
-          {Object.keys(userData).map((userId) => {
-            const currencyIcon = userData[userId].selectedCurrencyIcon;
-            let selectedIcon;
-            if (currencyIcon === "RupeeIcon.png") {
-              selectedIcon = rupeeIcon;
-            } else if (currencyIcon === "EuroIcon.png") {
-              selectedIcon = euroIcon;
-            } else if (currencyIcon === "PoundIcon.png") {
-              selectedIcon = poundIcon;
-            } else {
-              selectedIcon = dollarIcon;
-            }
-            return (
-              <TouchableOpacity
-                key={userId}
-                style={styles.userBox}
-                onPress={() => handleUserClick(userId)}
-              >
-                <Text style={styles.userName}>{userData[userId].name}</Text>
-                <Text style={styles.cashAmountText}>Cash Amount: </Text>
-                <Image source={selectedIcon} style={styles.image} />
-                <Text style={styles.cashAmount}>{userData[userId].cashAmount}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        <Text style={styles.accounts}>Your Accounts</Text>
+{userData && Object.keys(userData).length > 0 ? (
+  Object.keys(userData).map((userId) => {
+    const currencyIcon = userData[userId].selectedCurrencyIcon;
+    let selectedIcon;
+    if (currencyIcon === "RupeeIcon.png") {
+      selectedIcon = rupeeIcon;
+    } else if (currencyIcon === "EuroIcon.png") {
+      selectedIcon = euroIcon;
+    } else if (currencyIcon === "PoundIcon.png") {
+      selectedIcon = poundIcon;
+    } else {
+      selectedIcon = dollarIcon;
+    }
+    return (
+      <TouchableOpacity
+        key={userId}
+        style={styles.userBox}
+        onPress={() => handleUserClick(userId)}
+      >
+        <Text style={styles.userName}>{userData[userId].name}</Text>
+        <Text style={styles.cashAmountText}>Cash Amount: </Text>
+        <Image 
+          source={selectedIcon} 
+          style={[
+            styles.image,
+            userData[userId].cashAmount > 100000 ? { width: 12, height: 12 } : { width: 15, height: 15 }  // Adjust icon size based on cashAmount
+          ]}
+        />
+        <Text 
+          style={[
+            styles.cashAmount, 
+            userData[userId].cashAmount > 100000 ? { fontSize: 12 } : { fontSize: 15 }  // Adjust font size based on cashAmount
+          ]}
+        >
+          {userData[userId].cashAmount}
+        </Text>
+      </TouchableOpacity>
+    );
+  })
+) : (
+  <Text>No accounts found.</Text>
+)}
+
+      </ScrollView>
+    </KeyboardAvoidingView>
+  </GestureHandlerRootView>
   );
 };
 
@@ -203,10 +208,10 @@ userBox: {
   justifyContent: "space-between",
 },
 image: {
-  width: 20,
-  height: 20,
-  marginTop: 2,
+  width: 15,
+  height: 15,
   tintColor: "white",
+  marginRight: -2,
 },
 userName: {
   fontSize: 20,
@@ -219,12 +224,13 @@ cashAmountText: {
   fontSize: 15,
   textAlign: "right",
   color: "#ffffff",
-  marginLeft: 43,
+  marginLeft: 35,
 },
 cashAmount: {
   fontSize: 15,
   textAlign: "right",
-  color: "#ffffff"
+  color: "#ffffff",
+  marginRight: 10,
 },
 enterDetailsText: {
   fontSize: 36,
