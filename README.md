@@ -100,7 +100,7 @@ yarn start
 
 ## 📝 Feedback
 
-We value your feedback! Use the in-app Feedback form or [open an issue](https://github.com/yourusername/BudgeBuddy_ReactNative_/issues).
+We value your feedback! Use the in-app Feedback form or [open an issue](https://github.com/Jaiminp007/BudgeBuddy_ReactNative_/issues).
 
 ---
 
@@ -118,7 +118,7 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ## 👤 Author
 
-- [Your Name](https://github.com/yourusername)
+- [Jaimin](https://github.com/Jaiminp007)
 
 ---
 
