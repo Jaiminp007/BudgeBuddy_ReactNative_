@@ -1,8 +1,8 @@
-# BudgetBuddy
+# BudgeBuddy
 
 ![BudgetBuddy Logo](assets/Logo.png)
 
-**BudgetBuddy** is a cross-platform personal finance management app built with React Native and Expo. It helps users track cash, manage expenses, visualize spending trends, and provide feedback—all with a clean, modern UI.
+**BudgeBuddy** is a cross-platform personal finance management app built with React Native and Expo. It helps users track cash, manage expenses, visualize spending trends, and provide feedback—all with a clean, modern UI.
 
 ---
 
